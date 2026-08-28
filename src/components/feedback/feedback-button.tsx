@@ -71,11 +71,11 @@ export function FeedbackButton({
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface-studio border border-outline-variant text-on-surface font-label-sm text-label-sm px-4 py-2.5 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] hover:border-accent-indigo transition-all duration-200 active:scale-95 cursor-pointer"
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface-studio border border-outline-variant/60 text-on-surface text-[13px] font-medium px-4 py-2.5 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.1)] hover:border-accent-indigo/40 transition-all duration-200 active:scale-95 cursor-pointer backdrop-blur-sm"
         aria-label="Send feedback"
       >
         <span
-          className="material-symbols-outlined text-lg"
+          className="material-symbols-outlined text-[18px] text-accent-indigo"
           style={{ fontVariationSettings: "'FILL' 0" }}
         >
           feedback

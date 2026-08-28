@@ -73,8 +73,8 @@ export default function PaymentSuccessPage() {
             Invalid request
           </h1>
           <p className="text-secondary">No order ID provided.</p>
-          <Link href="/" className="text-[14px] text-accent-indigo hover:underline">
-            Go home
+          <Link href="/dashboard" className="text-[14px] text-accent-indigo hover:underline">
+            Go to Dashboard
           </Link>
         </div>
       </div>
@@ -159,7 +159,7 @@ export default function PaymentSuccessPage() {
             payment method.
           </p>
           <Link
-            href="/"
+            href="/dashboard"
             className="w-full bg-accent-indigo text-white py-3 rounded-lg text-[14px] font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
           >
             <span className="material-symbols-outlined text-[20px]">

@@ -1,0 +1,585 @@
+import Link from "next/link";
+import { ProductDemo } from "@/components/landing/product-demo";
+import { CheckoutDemo } from "@/components/landing/checkout-demo";
+import { DashboardDemo } from "@/components/landing/dashboard-demo";
+import { ComparisonSlider } from "@/components/landing/comparison-slider";
+
+const howItWorksSteps = [
+  {
+    num: "1",
+    title: "Upload your file",
+    desc: "Drag and drop audio, video, or documents. We handle hosting and delivery.",
+    icon: "fa-solid fa-cloud-arrow-up",
+  },
+  {
+    num: "2",
+    title: "Set your price",
+    desc: "Choose a fixed price or let buyers pay what they want. You control everything.",
+    icon: "fa-solid fa-tag",
+  },
+  {
+    num: "3",
+    title: "Share one link",
+    desc: "Paste your link anywhere—socials, emails, or bio. Buyers check out in seconds.",
+    icon: "fa-solid fa-link",
+  },
+  {
+    num: "4",
+    title: "Get paid instantly",
+    desc: "Funds land in your account fast. Withdraw whenever you're ready.",
+    icon: "fa-solid fa-money-bill-wave",
+  },
+];
+
+const features = [
+  {
+    icon: "fa-solid fa-cloud-arrow-up",
+    title: "Upload & Sell",
+    desc: "Upload digital files — music, templates, eBooks, code — and set your price in seconds.",
+  },
+  {
+    icon: "fa-solid fa-share",
+    title: "Share a Link",
+    desc: "Get a clean, branded product page. Share it anywhere — social media, email, your website.",
+  },
+  {
+    icon: "fa-solid fa-lock",
+    title: "Secure Delivery",
+    desc: "Buyers get a unique, expiring download link. Your files stay protected with one-time tokens.",
+  },
+  {
+    icon: "fa-solid fa-credit-card",
+    title: "Get Paid",
+    desc: "Accept payments via Stripe. Track orders, revenue, and downloads from a single dashboard.",
+  },
+];
+
+const tickerItems = [
+  'Producer sold "Neon Nights" — $45',
+  "Designer uploaded 3 templates",
+  "Photographer earned $128 today",
+  "New payout processed — $2,410",
+];
+
+export default function MarketingHomePage() {
+  return (
+    <>
+      {/* Hero Section */}
+      <section id="product" className="relative pt-20 pb-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8">
+            <span className="text-xs uppercase tracking-widest text-muted font-semibold">
+              Built for digital creators
+            </span>
+            <h1 className="text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1]">
+              Upload. Price it. Share the link. Get paid.
+            </h1>
+            <p className="text-lg text-muted max-w-md leading-relaxed">
+              Dropcue delivers instant automatic delivery for your audio,
+              presets, and PDFs. No store setup, no monthly fees—just a link and
+              a sale.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center justify-center px-8 py-3.5 bg-transparent border border-hairline rounded-lg text-base font-medium hover:bg-ink hover:text-white hover:border-ink transition-all duration-300"
+              >
+                Start selling for free
+              </Link>
+              <Link
+                href="/how-it-works"
+                className="inline-flex items-center gap-2 px-6 py-3.5 text-base font-medium text-muted hover:text-ink transition-colors"
+              >
+                See how it works{" "}
+                <i className="fa-solid fa-arrow-right text-xs" />
+              </Link>
+            </div>
+            <div className="pt-4 flex items-center gap-6 text-sm text-muted">
+              <span>
+                <i className="fa-solid fa-check mr-2 text-ink" />
+                Zero starting fees
+              </span>
+              <span>
+                <i className="fa-solid fa-check mr-2 text-ink" />
+                Instant payouts
+              </span>
+            </div>
+          </div>
+
+          {/* Live Product Demo */}
+          <div className="relative">
+            <ProductDemo />
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24 bg-paper">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-16">
+            <h2 className="text-4xl font-semibold tracking-tight mb-4">
+              How it works
+            </h2>
+            <p className="text-muted text-lg max-w-xl">
+              Four steps from upload to payout. Everything else is handled
+              automatically.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {howItWorksSteps.map((step) => (
+              <div
+                key={step.num}
+                className="bg-surface p-8 rounded-[var(--radius-jumbo)] shadow-soft border border-hairline"
+              >
+                <div className="w-12 h-12 bg-ink text-white rounded-xl flex items-center justify-center mb-6">
+                  <i className={`${step.icon} text-lg`} />
+                </div>
+                <h3 className="text-xl font-medium mb-3">{step.title}</h3>
+                <p className="text-muted text-sm leading-relaxed">
+                  {step.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Bento Gallery (Creators) */}
+      <section className="py-24 bg-paper">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-12">
+            <h2 className="text-4xl font-semibold tracking-tight mb-4">
+              Built for every kind of creator
+            </h2>
+            <p className="text-muted text-lg">
+              From beats to blueprints—sell whatever you make.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <a href="#" className="group space-y-4">
+              <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_5c6aef006b_5fbf7ed975a77f02.png"
+                  alt="music producer working at a laptop in a dim studio, headphones around neck, moody cinematic lighting"
+                />
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-music mt-1 text-accent" />
+                <div>
+                  <h3 className="font-medium">Music producers</h3>
+                  <p className="text-sm text-muted">
+                    Sell beats and samples directly to artists.
+                  </p>
+                </div>
+              </div>
+            </a>
+            <a href="#" className="group space-y-4">
+              <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_0c177620c4_66a8b87350dca01c.png"
+                  alt="photographer reviewing portfolio on a tablet in a bright minimalist workspace, natural light"
+                />
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-camera mt-1 text-accent" />
+                <div>
+                  <h3 className="font-medium">Photographers</h3>
+                  <p className="text-sm text-muted">
+                    License presets and high-res packs instantly.
+                  </p>
+                </div>
+              </div>
+            </a>
+            <a href="#" className="group space-y-4">
+              <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_62e714ee1f_768416ea97bf03da.png"
+                  alt="graphic designer sketching on a tablet at a clean desk, modern interior, soft daylight"
+                />
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-pen-nib mt-1 text-accent" />
+                <div>
+                  <h3 className="font-medium">Designers</h3>
+                  <p className="text-sm text-muted">
+                    Monetize templates, brushes, and mockups.
+                  </p>
+                </div>
+              </div>
+            </a>
+            <a href="#" className="group space-y-4">
+              <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_62d66394ea_baabfcf4cbe2adad.png"
+                  alt="video editor at a dual-monitor editing suite, focused expression, dark cinematic room"
+                />
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-film mt-1 text-accent" />
+                <div>
+                  <h3 className="font-medium">Video editors</h3>
+                  <p className="text-sm text-muted">
+                    Distribute LUTs, transitions, and reels packs.
+                  </p>
+                </div>
+              </div>
+            </a>
+            <a href="#" className="group space-y-4">
+              <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_d86383145e_cf0b624750471282.png"
+                  alt="online course creator recording a lesson on a phone tripod in a cozy home office, warm tones"
+                />
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-graduation-cap mt-1 text-accent" />
+                <div>
+                  <h3 className="font-medium">Course creators</h3>
+                  <p className="text-sm text-muted">
+                    Deliver full courses and worksheets automatically.
+                  </p>
+                </div>
+              </div>
+            </a>
+            <a href="#" className="group space-y-4">
+              <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_c7892e482e_d30957ffc16efd89.png"
+                  alt="writer typing on a laptop beside a notebook and coffee in a sunlit room, calm atmosphere"
+                />
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="fa-solid fa-book mt-1 text-accent" />
+                <div>
+                  <h3 className="font-medium">Writers</h3>
+                  <p className="text-sm text-muted">
+                    Sell guides, scripts, and downloadable books.
+                  </p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Showcase (split layout) */}
+      <section className="py-24 bg-paper border-t border-hairline">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="relative group">
+            <div className="absolute -inset-4 bg-accent/5 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden">
+              <img
+                className="w-full"
+                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_c8ebf89770_0b41853a99e41fb6.png"
+                alt="clean minimal web app dashboard UI mockup of a digital storefront showing product listings, sales stats"
+              />
+            </div>
+            <div className="absolute -bottom-6 -right-6 w-48 aspect-video bg-surface rounded-2xl shadow-jumbo border border-hairline p-3 hidden lg:block">
+              <img
+                className="w-full h-full object-cover rounded-xl"
+                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_5932d3c315_bfb75b90956babb7.png"
+                alt="sleek compact digital drive device product render without background, soft studio lighting"
+              />
+            </div>
+          </div>
+          <div className="space-y-8">
+            <h2 className="text-4xl font-semibold tracking-tight">
+              A storefront that sells while you sleep
+            </h2>
+            <p className="text-muted text-lg leading-relaxed">
+              Dropcue gives you a beautiful, mobile-ready checkout page in
+              seconds. Buyers pay, you get notified, and the file ships
+              automatically—no manual downloads, no back-and-forth.
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-center gap-3">
+                <i className="fa-solid fa-circle-check text-accent" />
+                <span>Automatic file delivery after purchase</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <i className="fa-solid fa-circle-check text-accent" />
+                <span>Built-in analytics and earnings tracker</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <i className="fa-solid fa-circle-check text-accent" />
+                <span>Custom branding on your checkout page</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Comparison Slider */}
+      <section className="py-24 bg-paper">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-semibold tracking-tight">
+              One link. Two experiences.
+            </h2>
+            <p className="text-muted mt-3">
+              Drag to compare the creator view and the buyer view.
+            </p>
+          </div>
+          <ComparisonSlider />
+        </div>
+      </section>
+
+      {/* Feature Showcase — Live Dashboard + Checkout */}
+      <section className="py-24 bg-paper border-t border-hairline">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="mb-16">
+            <h2 className="text-4xl font-semibold tracking-tight mb-4">
+              Everything you need to sell
+            </h2>
+            <p className="text-muted text-lg max-w-xl">
+              A complete toolkit — from upload to payout, all in one place.
+            </p>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Live Dashboard Preview */}
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted font-semibold mb-4">
+                Creator Dashboard
+              </p>
+              <DashboardDemo />
+            </div>
+            {/* Live Checkout Preview */}
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted font-semibold mb-4">
+                Buyer Checkout
+              </p>
+              <CheckoutDemo />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Grid */}
+      <section className="py-24 bg-paper border-t border-hairline">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className="bg-surface p-8 rounded-[var(--radius-jumbo)] shadow-soft border border-hairline"
+              >
+                <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-5">
+                  <i className={`${f.icon} text-accent text-lg`} />
+                </div>
+                <h3 className="text-xl font-medium mb-2">{f.title}</h3>
+                <p className="text-muted text-sm leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust & Security */}
+      <section
+        id="security"
+        className="py-24 bg-paper border-t border-hairline"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <h2 className="text-4xl font-semibold tracking-tight">
+                Secure, private, and built to last
+              </h2>
+              <p className="text-muted text-lg leading-relaxed">
+                Your files are stored securely and delivered through an encrypted
+                checkout. Buyers never see your source files, and you never
+                handle payments manually.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex items-center gap-3">
+                  <i className="fa-solid fa-shield-halved text-accent text-xl" />
+                  <span className="text-sm font-medium">Secure storage</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <i className="fa-solid fa-lock text-accent text-xl" />
+                  <span className="text-sm font-medium">
+                    Encrypted checkout
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <i className="fa-solid fa-eye-slash text-accent text-xl" />
+                  <span className="text-sm font-medium">
+                    Private by default
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <i className="fa-solid fa-clock text-accent text-xl" />
+                  <span className="text-sm font-medium">Always online</span>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline p-12 text-center space-y-6">
+                <div className="w-20 h-20 mx-auto bg-accent/10 rounded-full flex items-center justify-center">
+                  <i className="fa-solid fa-shield-heart text-accent text-3xl" />
+                </div>
+                <h3 className="text-2xl font-semibold">
+                  Protected for creators and buyers alike
+                </h3>
+                <p className="text-muted">
+                  Every transaction is backed by enterprise-grade security and
+                  monitored in real time.
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-accent" />
+                  </span>
+                  <span className="text-xs text-muted uppercase tracking-widest font-semibold">
+                    System Operational
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Activity Ticker */}
+          <div className="mt-24 border-t border-hairline pt-12">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+              </span>
+              <span className="text-xs uppercase tracking-widest font-semibold text-muted">
+                Live Platform Activity
+              </span>
+            </div>
+            <div className="overflow-hidden h-12 flex items-center">
+              <div className="flex gap-12 animate-ticker whitespace-nowrap text-sm text-muted font-mono">
+                {tickerItems.map((item, i) => (
+                  <span key={i}>{item}</span>
+                ))}
+                {tickerItems.map((item, i) => (
+                  <span key={`dup-${i}`}>{item}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24 bg-paper border-t border-hairline">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-semibold tracking-tight mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-muted text-lg max-w-2xl mx-auto">
+              No monthly fees. No hidden charges. You keep the majority of what
+              you earn.
+            </p>
+          </div>
+          <div className="max-w-md mx-auto">
+            <div className="bg-surface p-10 rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline text-center space-y-6">
+              <h3 className="text-2xl font-semibold">
+                Free to start, small fee per sale
+              </h3>
+              <div className="py-4">
+                <span className="text-5xl font-semibold tracking-tight">
+                  $0
+                </span>
+                <span className="text-muted text-sm ml-2">to get started</span>
+              </div>
+              <p className="text-muted">
+                Only a small percentage when someone buys. No subscriptions,
+                ever.
+              </p>
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center justify-center w-full px-8 py-3.5 bg-transparent border border-hairline rounded-lg text-base font-medium hover:bg-ink hover:text-white hover:border-ink transition-all duration-300"
+              >
+                Start selling for free
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24 bg-paper border-t border-hairline">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <i className="fa-solid fa-quote-left text-accent text-4xl" />
+              <blockquote className="text-2xl font-medium leading-relaxed tracking-tight">
+                &ldquo;I uploaded a pack of presets on a Tuesday and had my first
+                sale by Thursday morning. Dropcue handled the rest.&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
+                  <i className="fa-solid fa-user text-accent" />
+                </div>
+                <div>
+                  <div className="font-medium">Alex Rivera</div>
+                  <div className="text-sm text-muted">
+                    Independent Music Producer
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline p-12">
+                <div className="flex items-center gap-1 mb-6">
+                  {[...Array(5)].map((_, i) => (
+                    <i key={i} className="fa-solid fa-star text-accent" />
+                  ))}
+                </div>
+                <p className="text-muted mb-8">
+                  Join thousands of creators who trust Dropcue to deliver their
+                  work and get paid.
+                </p>
+                <div className="flex -space-x-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-12 h-12 rounded-full border-2 border-surface bg-gray-100 flex items-center justify-center text-xs font-medium text-muted"
+                    >
+                      {String.fromCharCode(65 + i)}
+                    </div>
+                  ))}
+                  <div className="w-12 h-12 rounded-full border-2 border-surface bg-gray-100 flex items-center justify-center text-xs font-medium">
+                    +2k
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section
+        id="start"
+        className="py-32 bg-paper border-t border-hairline"
+      >
+        <div className="max-w-3xl mx-auto px-6 text-center space-y-8">
+          <h2 className="text-5xl font-semibold tracking-tight">
+            Your first sale can happen today
+          </h2>
+          <p className="text-muted text-lg">
+            Create your account, upload a file, and share your link. It takes
+            less than five minutes.
+          </p>
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center justify-center px-10 py-4 bg-accent text-white rounded-lg text-lg font-medium hover:bg-[#2d25a3] transition-all"
+          >
+            Start selling for free
+          </Link>
+        </div>
+      </section>
+    </>
+  );
+}

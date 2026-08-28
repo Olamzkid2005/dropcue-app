@@ -152,7 +152,7 @@ export default function SetupPage() {
               All tables have been created successfully.
             </p>
             <a
-              href="/"
+              href="/dashboard"
               className="inline-flex items-center justify-center bg-accent-indigo text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-accent-indigo/90 transition-colors"
             >
               Go to Dashboard

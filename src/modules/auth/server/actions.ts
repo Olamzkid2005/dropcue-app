@@ -2,11 +2,20 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function sendMagicLink(email: string) {
-  const supabase = await createClient();
+const NOT_CONFIGURED_MSG =
+  "Supabase is not configured. Add your Supabase credentials to .env.local";
 
-  const { error } = await supabase.auth.signInWithOtp({
+export async function signUp(email: string, password: string) {
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return { success: false, error: NOT_CONFIGURED_MSG };
+  }
+
+  const { error } = await supabase.auth.signUp({
     email,
+    password,
     options: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
@@ -19,12 +28,36 @@ export async function sendMagicLink(email: string) {
   return { success: true, error: null };
 }
 
+export async function signIn(email: string, password: string) {
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return { success: false, error: NOT_CONFIGURED_MSG };
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, error: null };
+}
+
 /**
  * Get the OAuth sign-in URL for Google.
- * The client redirects the user to this URL.
  */
 export async function getGoogleSignInUrl() {
-  const supabase = await createClient();
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return { success: false, error: NOT_CONFIGURED_MSG, url: null };
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -46,10 +79,14 @@ export async function getGoogleSignInUrl() {
 
 /**
  * Get the OAuth sign-in URL for Apple.
- * The client redirects the user to this URL.
  */
 export async function getAppleSignInUrl() {
-  const supabase = await createClient();
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch {
+    return { success: false, error: NOT_CONFIGURED_MSG, url: null };
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "apple",
@@ -66,6 +103,10 @@ export async function getAppleSignInUrl() {
 }
 
 export async function signOut() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // Supabase not configured — no-op
+  }
 }

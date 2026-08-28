@@ -4,78 +4,130 @@
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 /* Google Fonts - Geist & Inter */
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-accent-indigo: var(--accent-indigo);
-  --color-on-surface: var(--on-surface);
-  --color-on-primary: var(--on-primary);
-  --color-secondary: var(--secondary);
-  --color-outline-variant: var(--outline-variant);
-  --color-outline: var(--outline);
-  --color-surface-studio: var(--surface-studio);
-  --color-surface-canvas: var(--surface-canvas);
-  --color-surface-container-low: var(--surface-container-low);
-  --color-surface-container: var(--surface-container);
-  --color-surface-container-high: var(--surface-container-high);
-  --color-surface-container-highest: var(--surface-container-highest);
-  --color-surface-bright: var(--surface-bright);
-  --color-surface-dim: var(--surface-dim);
-  --color-primary: var(--primary);
-  --color-primary-container: var(--primary-container);
-  --color-success-green: var(--success-green);
-  --color-error-red: var(--error-red);
-  --color-error-container: var(--error-container);
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
+  --color-ink: #141416;
+  --color-muted: #6e6e73;
+  --color-hairline: #e5e5e0;
+  --color-paper: #fbfbfa;
+  --color-surface: #ffffff;
+  --color-accent: #3a30c7;
+  /* Legacy tokens kept for app pages */
+  --color-accent-indigo: var(--accent);
+  --color-on-surface: var(--ink);
+  --color-on-primary: #ffffff;
+  --color-secondary: var(--muted);
+  --color-outline-variant: var(--hairline);
+  --color-outline: #94a3b8;
+  --color-surface-studio: var(--surface);
+  --color-surface-canvas: var(--paper);
+  --color-surface-container-low: #f1f5f9;
+  --color-surface-container: #e2e8f0;
+  --color-surface-container-high: #cbd5e1;
+  --color-surface-container-highest: #94a3b8;
+  --color-surface-bright: #ffffff;
+  --color-surface-dim: #e2e8f0;
+  --color-primary: var(--ink);
+  --color-primary-container: #1e293b;
+  --color-success-green: #10b981;
+  --color-error-red: #ef4444;
+  --color-error-container: #fef2f2;
+  --color-border: var(--hairline);
+  --color-ring: var(--accent);
+  --color-input: var(--hairline);
+  --shadow-soft: 0 8px 30px rgba(20, 20, 22, 0.06);
+  --shadow-jumbo: 0 18px 60px rgba(20, 20, 22, 0.12);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --radius-jumbo: 2rem;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.375rem;
-  --accent-indigo: #4338CA;
-  --on-surface: #0b1c30;
+  --radius: 0.5rem;
+  --accent-indigo: #3a30c7;
+  --on-surface: #141416;
   --on-primary: #ffffff;
-  --secondary: #5c5f61;
-  --outline-variant: #c5c6cd;
-  --outline: #75777d;
+  --secondary: #6e6e73;
+  --outline-variant: #e5e5e0;
+  --outline: #94a3b8;
   --surface-studio: #ffffff;
-  --surface-canvas: #f1f5f9;
-  --surface-container-low: #eff4ff;
-  --surface-container: #e5eeff;
-  --surface-container-high: #dce9ff;
-  --surface-container-highest: #d3e4fe;
-  --surface-bright: #f8f9ff;
-  --surface-dim: #cbdbf5;
-  --primary: #091426;
+  --surface-canvas: #fbfbfa;
+  --surface-container-low: #f1f5f9;
+  --surface-container: #e2e8f0;
+  --surface-container-high: #cbd5e1;
+  --surface-container-highest: #94a3b8;
+  --surface-bright: #ffffff;
+  --surface-dim: #e2e8f0;
+  --primary: #141416;
   --primary-container: #1e293b;
   --success-green: #10b981;
   --error-red: #ef4444;
-  --error-container: #ffdad6;
-  --background: #f1f5f9;
-  --foreground: #0b1c30;
-  --border: #c5c6cd;
-  --ring: #4338ca;
-  --input: #c5c6cd;
+  --error-container: #fef2f2;
+  --background: #fbfbfa;
+  --foreground: #141416;
+  --border: #e5e5e0;
+  --ring: #3a30c7;
+  --input: #e5e5e0;
 }
 
 /* Material Symbols base */
 .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-.material-symbols-outlined[data-weight="fill"] {
+.material-symbols-outlined[data-weight="fill"],
+.material-symbols-outlined.fill {
   font-variation-settings: "FILL" 1;
+}
+
+/* Nav link underline animation — exact from design */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #141416;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Product card hover — exact from design */
+.product-card-hover:hover .product-image {
+  transform: scale(1.02);
+}
+.product-image {
+  transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 /* Waveform bars */
@@ -86,7 +138,7 @@
   transition: height 0.1s ease, background-color 0.2s ease;
 }
 .waveform-bar.active {
-  background-color: #4338ca;
+  background-color: #3a30c7;
 }
 
 /* Animations */
@@ -114,6 +166,11 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 .loading-pulse {
   animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
@@ -128,6 +185,10 @@
 
 .animate-zoom-in {
   animation: zoom-in 0.3s ease-out;
+}
+
+.animate-ticker {
+  animation: ticker-scroll 20s linear infinite;
 }
 
 /* Spinner */
@@ -156,15 +217,19 @@
 }
 
 body {
-  background-color: var(--surface-canvas);
-  color: var(--on-surface);
-  font-family: "Inter", sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background-color: #c5c6cd; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
 
 /* Line clamp */
 .line-clamp-2 {

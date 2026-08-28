@@ -31,57 +31,72 @@ export function Nav() {
   }
 
   return (
-    <nav className="bg-surface-studio border-b border-outline-variant fixed top-0 left-0 w-full z-50 flex justify-between items-center h-16 px-6 max-w-[1120px] mx-auto">
-      {/* Left: Brand */}
-      <div className="flex items-center gap-6">
-        <Link
-          href="/"
-          className="font-[family-name:var(--font-geist)] text-[24px] font-bold text-on-surface tracking-tight"
-        >
-          Dropcue
-        </Link>
-        {user && (
-          <div className="hidden md:flex gap-4 items-center">
-            <Link
-              href="/"
-              className="text-accent-indigo font-bold border-b-2 border-accent-indigo pb-1 pt-1 text-[14px] font-medium"
-            >
-              Products
-            </Link>
-          </div>
-        )}
-      </div>
-
-      {/* Right: Actions */}
-      <div className="flex items-center gap-4">
-        {user ? (
-          <>
-            <Link
-              href="/products/new"
-              className="hidden md:flex bg-accent-indigo text-white px-4 py-2 rounded-lg text-[14px] font-medium hover:opacity-90 transition-opacity"
-            >
-              Create Product
-            </Link>
-            <button className="text-secondary hover:bg-surface-container-low p-2 rounded-full transition-colors">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="w-8 h-8 rounded-full bg-surface-dim overflow-hidden border border-outline-variant cursor-pointer"
-            >
-              <div className="w-full h-full flex items-center justify-center text-secondary text-sm font-medium">
-                {user.email?.charAt(0).toUpperCase()}
-              </div>
-            </button>
-          </>
-        ) : (
+    <nav className="bg-surface-studio/80 backdrop-blur-xl border-b border-outline-variant/60 fixed top-0 left-0 w-full z-50">
+      <div className="flex justify-between items-center h-16 px-6 max-w-[1120px] mx-auto">
+        {/* Left: Brand */}
+        <div className="flex items-center gap-8">
           <Link
-            href="/auth/login"
-            className="bg-accent-indigo text-white px-4 py-2 rounded-lg text-[14px] font-medium hover:opacity-90 transition-opacity"
+            href="/"
+            className="flex items-center gap-2.5 group"
           >
-            Sign in
+            <img
+              src="/logo.png"
+              alt="Dropcue"
+              className="h-[72px] w-auto"
+            />
           </Link>
-        )}
+          {user && (
+            <div className="hidden md:flex gap-1 items-center">
+              <Link
+                href="/dashboard"
+                className="text-accent-indigo font-semibold border-b-2 border-accent-indigo pb-0.5 pt-1 px-1 text-[14px] rounded-sm"
+              >
+                Dashboard
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3">
+          {user ? (
+            <>
+              <Link
+                href="/products/new"
+                className="hidden md:flex bg-accent-indigo text-white px-4 py-2 rounded-lg text-[13px] font-semibold hover:bg-accent-indigo/90 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.97] items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                Create Product
+              </Link>
+              <button className="text-secondary hover:text-on-surface hover:bg-surface-container-low p-2 rounded-lg transition-all duration-200">
+                <span className="material-symbols-outlined text-[22px]">notifications</span>
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="w-8 h-8 rounded-full bg-accent-indigo/10 border border-accent-indigo/20 cursor-pointer hover:bg-accent-indigo/20 transition-colors"
+              >
+                <div className="w-full h-full flex items-center justify-center text-accent-indigo text-sm font-semibold">
+                  {user.email?.charAt(0).toUpperCase()}
+                </div>
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/auth/login"
+                className="text-secondary hover:text-on-surface px-3 py-2 rounded-lg text-[13px] font-medium hover:bg-surface-container-low transition-all duration-200"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/auth/login"
+                className="bg-accent-indigo text-white px-5 py-2 rounded-lg text-[13px] font-semibold hover:bg-accent-indigo/90 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.97]"
+              >
+                Get started
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );

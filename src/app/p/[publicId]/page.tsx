@@ -51,9 +51,11 @@ export default async function PublicProductPage({ params }: Props) {
       {/* Minimal Header */}
       <header className="w-full h-16 bg-surface-studio border-b border-outline-variant flex items-center px-6 md:px-16 shrink-0 sticky top-0 z-50">
         <div className="max-w-[1120px] mx-auto w-full flex justify-center md:justify-start">
-          <span className="font-[family-name:var(--font-geist)] text-[24px] font-bold text-on-surface tracking-tight">
-            Dropcue
-          </span>
+          <img
+            src="/logo.png"
+            alt="Dropcue"
+            className="h-[72px] w-auto"
+          />
         </div>
       </header>
 
