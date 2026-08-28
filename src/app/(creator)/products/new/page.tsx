@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AppLayout } from "@/components/app-layout";
+import { Nav } from "@/components/nav";
+import { createProduct } from "@/modules/products/server/actions";
 
 export default function NewProductPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [createdProduct, setCreatedProduct] = useState<{ id: string; name: string } | null>(null);
+  const [error, setError] = useState("");
+  const [createdProduct, setCreatedProduct] = useState<{ id: string; name: string; public_id: string } | null>(null);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -18,20 +20,29 @@ export default function NewProductPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
 
-    // Mock creation - simulate API call
-    await new Promise((r) => setTimeout(r, 1500));
+    const result = await createProduct({
+      name: form.name,
+      description: form.description || undefined,
+      price_amount: form.price_amount,
+    });
 
-    const mockId = `mock-${Date.now()}`;
-    setCreatedProduct({ id: mockId, name: form.name });
-    setSuccess(true);
+    if (result.success && result.product) {
+      setCreatedProduct({ id: result.product.id, name: result.product.name, public_id: result.product.public_id });
+      setSuccess(true);
+    } else {
+      setError(result.error ?? "Failed to create product");
+    }
+
     setIsSubmitting(false);
   }
 
   if (success && createdProduct) {
     return (
-      <AppLayout>
-        <main className="flex-1 w-full max-w-[640px] mx-auto px-4 md:px-0 py-16 flex flex-col gap-8">
+      <>
+        <Nav />
+        <main className="flex-1 w-full max-w-[640px] mx-auto px-4 md:px-0 py-16 flex flex-col gap-8 pt-24">
           {/* Success State */}
           <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -74,7 +85,7 @@ export default function NewProductPage() {
                 <input
                   type="text"
                   readOnly
-                  value={`https://dropcue.co/p/${createdProduct.id}`}
+                  value={`${typeof window !== "undefined" ? window.location.origin : ""}/p/${createdProduct.public_id}`}
                   className="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-[#6e6e73] font-mono"
                 />
                 <button className="bg-[#4338CA] hover:bg-[#3730A3] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
@@ -123,13 +134,14 @@ export default function NewProductPage() {
             </div>
           </div>
         </main>
-      </AppLayout>
+      </>
     );
   }
 
   return (
-    <AppLayout>
-      <main className="flex-1 w-full max-w-[640px] mx-auto px-4 md:px-0 py-16 flex flex-col gap-8">
+    <>
+      <Nav />
+      <main className="flex-1 w-full max-w-[640px] mx-auto px-4 md:px-0 py-16 flex flex-col gap-8 pt-24">
         {/* Header */}
         <header className="flex flex-col gap-2">
           <h1 className="text-[32px] md:text-[40px] font-bold text-[#141416] leading-tight">
@@ -145,6 +157,11 @@ export default function NewProductPage() {
           onSubmit={handleSubmit}
           className="flex flex-col gap-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm"
         >
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-[14px] text-red-600">
+              {error}
+            </div>
+          )}
           {/* Basic Details */}
           <section className="flex flex-col gap-4">
             <h2 className="text-[18px] font-semibold text-[#141416] border-b border-gray-200 pb-2">
@@ -242,6 +259,6 @@ export default function NewProductPage() {
           </div>
         </form>
       </main>
-    </AppLayout>
+    </>
   );
 }

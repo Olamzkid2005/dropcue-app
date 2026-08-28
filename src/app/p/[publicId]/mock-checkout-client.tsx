@@ -2,26 +2,61 @@
 
 import { useState } from "react";
 
-interface MockCheckoutClientProps {
+interface CheckoutClientProps {
   productId: string;
   productName: string;
   price: string;
 }
 
-export function MockCheckoutClient({ productId, productName, price }: MockCheckoutClientProps) {
+export function MockCheckoutClient({
+  productId,
+  price,
+}: CheckoutClientProps) {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<"idle" | "error" | "success">("idle");
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
+    if (!email || isSubmitting) return;
 
-    setStatus("processing");
-    
-    // Mock payment processing
-    await new Promise((r) => setTimeout(r, 2000));
-    
-    setStatus("success");
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/checkout/${productId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          buyer_email: email,
+          payment_provider: "bachs",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setStatus("error");
+        setError(data.error ?? "Checkout failed. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      // If checkout_url is returned, redirect to payment provider
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+        return;
+      }
+
+      // If no checkout_url (e.g. provider not configured), show success
+      setStatus("success");
+    } catch {
+      setStatus("error");
+      setError("Network error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   if (status === "success") {
@@ -40,7 +75,7 @@ export function MockCheckoutClient({ productId, productName, price }: MockChecko
     );
   }
 
-  if (status === "processing") {
+  if (isSubmitting) {
     return (
       <div className="text-center py-6">
         <div className="w-10 h-10 border-3 border-[#4338CA] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -68,9 +103,16 @@ export function MockCheckoutClient({ productId, productName, price }: MockChecko
         </p>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-[13px] text-red-600">
+          {error}
+        </div>
+      )}
+
       <button
         type="submit"
-        className="w-full h-12 bg-[#4338CA] text-white rounded-xl text-[14px] font-semibold hover:bg-[#3730A3] transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-sm"
+        disabled={isSubmitting}
+        className="w-full h-12 bg-[#4338CA] text-white rounded-xl text-[14px] font-semibold hover:bg-[#3730A3] transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-sm disabled:opacity-50"
       >
         <span className="material-symbols-outlined text-[18px]">
           shopping_cart
@@ -80,11 +122,15 @@ export function MockCheckoutClient({ productId, productName, price }: MockChecko
 
       <div className="flex items-center justify-center gap-4 pt-2">
         <span className="flex items-center gap-1.5 text-xs text-[#6e6e73]">
-          <span className="material-symbols-outlined text-[#4338CA] text-sm">lock</span>
+          <span className="material-symbols-outlined text-[#4338CA] text-sm">
+            lock
+          </span>
           Secure checkout
         </span>
         <span className="flex items-center gap-1.5 text-xs text-[#6e6e73]">
-          <span className="material-symbols-outlined text-[#4338CA] text-sm">bolt</span>
+          <span className="material-symbols-outlined text-[#4338CA] text-sm">
+            bolt
+          </span>
           Instant delivery
         </span>
       </div>

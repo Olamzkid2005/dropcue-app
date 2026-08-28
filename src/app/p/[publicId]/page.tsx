@@ -1,43 +1,7 @@
 import { notFound } from "next/navigation";
+import { getPublicProduct } from "@/modules/products/server/actions";
+import { formatDisplayPrice, createMoney } from "@/lib/money/types";
 import { MockCheckoutClient } from "./mock-checkout-client";
-
-const MOCK_PRODUCTS: Record<string, {
-  name: string;
-  description: string;
-  price_amount: number;
-  cover_image_url: string | null;
-  files: { id: string; original_filename: string; mime_type: string }[];
-}> = {
-  "summer-nights": {
-    name: "Summer Nights",
-    description: "A smooth melodic production for late-night records. Perfect for artists looking for an atmospheric, introspective soundscape.",
-    price_amount: 1500000,
-    cover_image_url: "/midnight-drive-cover.png",
-    files: [
-      { id: "f1", original_filename: "Summer_Nights_HQ.wav", mime_type: "audio/wav" },
-      { id: "f2", original_filename: "Summer_Nights_MP3.zip", mime_type: "application/zip" },
-    ],
-  },
-  "lagos-vibes": {
-    name: "Lagos Vibes",
-    description: "Upbeat Afrobeat instrumental with infectious rhythms. Guaranteed to get people moving.",
-    price_amount: 2000000,
-    cover_image_url: null,
-    files: [
-      { id: "f3", original_filename: "Lagos_Vibes_Master.wav", mime_type: "audio/wav" },
-    ],
-  },
-  "midnight-drive": {
-    name: "Midnight Drive Type Beat",
-    description: "Moody, atmospheric beat perfect for late night recording sessions.",
-    price_amount: 2900000,
-    cover_image_url: "/midnight-drive-cover.png",
-    files: [
-      { id: "f4", original_filename: "Midnight_Drive_Inst.wav", mime_type: "audio/wav" },
-      { id: "f5", original_filename: "Midnight_Drive_Stems.zip", mime_type: "application/zip" },
-    ],
-  },
-};
 
 interface Props {
   params: Promise<{ publicId: string }>;
@@ -45,7 +9,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { publicId } = await params;
-  const product = MOCK_PRODUCTS[publicId];
+  const { product } = await getPublicProduct(publicId);
 
   if (!product) {
     return { title: "Product Not Found" };
@@ -53,19 +17,19 @@ export async function generateMetadata({ params }: Props) {
 
   return {
     title: `${product.name} — Dropcue`,
-    description: product.description,
+    description: product.description ?? `Buy ${product.name} on Dropcue`,
   };
 }
 
 export default async function PublicProductPage({ params }: Props) {
   const { publicId } = await params;
-  const product = MOCK_PRODUCTS[publicId];
+  const { product } = await getPublicProduct(publicId);
 
   if (!product) {
     notFound();
   }
 
-  const displayPrice = `\u20A6${(product.price_amount / 100).toLocaleString("en-NG")}`;
+  const displayPrice = formatDisplayPrice(createMoney(product.price_amount));
 
   return (
     <>
@@ -159,35 +123,37 @@ export default async function PublicProductPage({ params }: Props) {
                   )}
 
                   {/* Included Files */}
-                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200/50">
-                    <h3 className="text-[14px] font-medium text-[#141416] mb-2 px-2 pt-1">
-                      Included Assets
-                    </h3>
-                    <ul className="flex flex-col gap-1">
-                      {product.files.map((file) => (
-                        <li
-                          key={file.id}
-                          className="flex items-center gap-3 p-2 text-[#6e6e73] rounded-md"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">
-                            {file.mime_type.startsWith("audio/")
-                              ? "audio_file"
-                              : file.mime_type.includes("zip")
-                                ? "folder_zip"
-                                : "description"}
-                          </span>
-                          <span className="text-[14px]">
-                            {file.original_filename}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {product.files.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200/50">
+                      <h3 className="text-[14px] font-medium text-[#141416] mb-2 px-2 pt-1">
+                        Included Assets ({product.files.length})
+                      </h3>
+                      <ul className="flex flex-col gap-1">
+                        {product.files.map((file) => (
+                          <li
+                            key={file.id}
+                            className="flex items-center gap-3 p-2 text-[#6e6e73] rounded-md"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">
+                              {file.mime_type.startsWith("audio/")
+                                ? "audio_file"
+                                : file.mime_type.includes("zip")
+                                  ? "folder_zip"
+                                  : "description"}
+                            </span>
+                            <span className="text-[14px]">
+                              {file.original_filename}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
-                {/* Checkout Form (Mock) */}
+                {/* Checkout Form */}
                 <MockCheckoutClient
-                  productId={publicId}
+                  productId={product.id}
                   productName={product.name}
                   price={displayPrice}
                 />

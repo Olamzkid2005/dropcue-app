@@ -73,7 +73,7 @@ export async function createUploadUrl(input: {
     .eq("product_id", input.product_id);
 
   const totalSize = (existingFiles ?? []).reduce(
-    (sum, f) => sum + f.file_size,
+    (sum: number, f: { file_size: number }) => sum + f.file_size,
     0
   );
   if (totalSize + input.file_size > FILE_LIMITS.maxTotalProductSize) {

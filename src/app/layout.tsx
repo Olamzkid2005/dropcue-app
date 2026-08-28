@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
+import Link from "next/link";
+import { FeedbackButton } from "@/components/feedback/feedback-button";
 import "./globals.css";
 
 const geist = Geist({
@@ -45,6 +47,7 @@ export default function RootLayout({
       </head>
       <body className={`${geist.variable} ${inter.variable} antialiased`}>
         {children}
+        <FeedbackButton pageUrl="/" />
       </body>
     </html>
   );

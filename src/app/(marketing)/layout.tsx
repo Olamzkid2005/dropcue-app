@@ -75,7 +75,7 @@ export default function MarketingLayout({
         </div>
       </header>
 
-      <main>{children}</main>
+      <main className="overflow-x-hidden">{children}</main>
 
       {/* Footer — exact from design */}
       <footer className="bg-paper border-t border-hairline py-20">
