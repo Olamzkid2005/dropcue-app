@@ -39,7 +39,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <img
                 src="/logo.png"
                 alt="Dropcue"
-                className="h-[72px] w-auto"
+                className="h-12 w-auto"
               />
             </Link>
             {user && (

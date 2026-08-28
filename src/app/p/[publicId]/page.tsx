@@ -1,72 +1,93 @@
 import { notFound } from "next/navigation";
-import { getPublicProduct } from "@/modules/products/server/actions";
-import { formatDisplayPrice, createMoney } from "@/lib/money/types";
-import { CheckoutForm } from "@/components/checkout/checkout-form";
-import type { Metadata } from "next";
+import { MockCheckoutClient } from "./mock-checkout-client";
+
+const MOCK_PRODUCTS: Record<string, {
+  name: string;
+  description: string;
+  price_amount: number;
+  cover_image_url: string | null;
+  files: { id: string; original_filename: string; mime_type: string }[];
+}> = {
+  "summer-nights": {
+    name: "Summer Nights",
+    description: "A smooth melodic production for late-night records. Perfect for artists looking for an atmospheric, introspective soundscape.",
+    price_amount: 1500000,
+    cover_image_url: "/midnight-drive-cover.png",
+    files: [
+      { id: "f1", original_filename: "Summer_Nights_HQ.wav", mime_type: "audio/wav" },
+      { id: "f2", original_filename: "Summer_Nights_MP3.zip", mime_type: "application/zip" },
+    ],
+  },
+  "lagos-vibes": {
+    name: "Lagos Vibes",
+    description: "Upbeat Afrobeat instrumental with infectious rhythms. Guaranteed to get people moving.",
+    price_amount: 2000000,
+    cover_image_url: null,
+    files: [
+      { id: "f3", original_filename: "Lagos_Vibes_Master.wav", mime_type: "audio/wav" },
+    ],
+  },
+  "midnight-drive": {
+    name: "Midnight Drive Type Beat",
+    description: "Moody, atmospheric beat perfect for late night recording sessions.",
+    price_amount: 2900000,
+    cover_image_url: "/midnight-drive-cover.png",
+    files: [
+      { id: "f4", original_filename: "Midnight_Drive_Inst.wav", mime_type: "audio/wav" },
+      { id: "f5", original_filename: "Midnight_Drive_Stems.zip", mime_type: "application/zip" },
+    ],
+  },
+};
 
 interface Props {
   params: Promise<{ publicId: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  try {
-    const { publicId } = await params;
-    const { product } = await getPublicProduct(publicId);
+export async function generateMetadata({ params }: Props) {
+  const { publicId } = await params;
+  const product = MOCK_PRODUCTS[publicId];
 
-    if (!product) {
-      return { title: "Product Not Found" };
-    }
-
-    return {
-      title: `${product.name} — Dropcue`,
-      description:
-        product.description || `Buy ${product.name} securely and download instantly`,
-      openGraph: {
-        title: `${product.name} — Dropcue`,
-        description: "Buy securely and download instantly",
-        type: "website",
-        ...(product.cover_image_url && { images: [product.cover_image_url] }),
-      },
-    };
-  } catch {
+  if (!product) {
     return { title: "Product Not Found" };
   }
+
+  return {
+    title: `${product.name} — Dropcue`,
+    description: product.description,
+  };
 }
 
 export default async function PublicProductPage({ params }: Props) {
-  let product;
+  const { publicId } = await params;
+  const product = MOCK_PRODUCTS[publicId];
 
-  try {
-    const { publicId } = await params;
-    const result = await getPublicProduct(publicId);
-    product = result.product;
-  } catch {
+  if (!product) {
     notFound();
   }
 
-  if (!product) notFound();
+  const displayPrice = `\u20A6${(product.price_amount / 100).toLocaleString("en-NG")}`;
 
   return (
     <>
-      {/* Minimal Header */}
-      <header className="w-full h-16 bg-surface-studio border-b border-outline-variant flex items-center px-6 md:px-16 shrink-0 sticky top-0 z-50">
+      {/* Header */}
+      <header className="w-full h-16 bg-white border-b border-gray-200 flex items-center px-6 md:px-16 shrink-0 sticky top-0 z-50">
         <div className="max-w-[1120px] mx-auto w-full flex justify-center md:justify-start">
           <img
             src="/logo.png"
             alt="Dropcue"
-            className="h-[72px] w-auto"
+            className="h-12 w-auto"
           />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow w-full py-16 px-4 md:px-6">
+      <main className="flex-grow w-full py-16 px-4 md:px-6 bg-[#F8FAFC]">
         <div className="max-w-[1120px] mx-auto h-full flex items-center justify-center">
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 max-w-[1000px]">
             {/* Left: Visuals */}
             <div className="md:col-span-7 flex flex-col gap-4">
               {/* Cover Art */}
-              <div className="relative w-full aspect-square md:aspect-[4/3] rounded-xl overflow-hidden bg-surface-studio border border-outline-variant shadow-sm">
+              <div className="relative w-full aspect-square md:aspect-[4/3] rounded-xl overflow-hidden bg-white border border-gray-200 shadow-sm">
                 {product.cover_image_url ? (
                   <img
                     src={product.cover_image_url}
@@ -74,25 +95,25 @@ export default async function PublicProductPage({ params }: Props) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-surface-container-low">
-                    <span className="material-symbols-outlined text-accent-indigo text-[64px]">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <span className="material-symbols-outlined text-[#4338CA] text-[64px]">
                       audio_file
                     </span>
                   </div>
                 )}
-                <div className="absolute top-4 left-4 bg-surface-studio/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-outline-variant flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-accent-indigo">
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-gray-200 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-[#4338CA]">
                     music_note
                   </span>
-                  <span className="text-[13px] font-semibold text-on-surface">
+                  <span className="text-[13px] font-semibold text-[#141416]">
                     Premium Beat
                   </span>
                 </div>
               </div>
 
               {/* Audio Player Placeholder */}
-              <div className="bg-surface-studio border border-outline-variant rounded-xl p-4 flex items-center gap-4 shadow-sm">
-                <button className="w-12 h-12 rounded-full bg-accent-indigo text-on-primary flex items-center justify-center shrink-0 hover:bg-primary-container transition-colors">
+              <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 shadow-sm">
+                <button className="w-12 h-12 rounded-full bg-[#4338CA] text-white flex items-center justify-center shrink-0 hover:bg-[#3730A3] transition-colors">
                   <span className="material-symbols-outlined text-[24px]">
                     play_arrow
                   </span>
@@ -102,15 +123,15 @@ export default async function PublicProductPage({ params }: Props) {
                     <div
                       key={i}
                       className={`w-1 rounded-full ${
-                        i < 13 ? "bg-accent-indigo" : "bg-primary-fixed-dim"
+                        i < 13 ? "bg-[#4338CA]" : "bg-gray-200"
                       }`}
                       style={{
-                        height: `${Math.floor(Math.random() * 80) + 20}%`,
+                        height: `${Math.floor(seededRandom(i) * 80) + 20}%`,
                       }}
                     />
                   ))}
                 </div>
-                <span className="text-[12px] text-secondary shrink-0 w-12 text-right">
+                <span className="text-[12px] text-[#6e6e73] shrink-0 w-12 text-right">
                   0:00
                 </span>
               </div>
@@ -118,35 +139,35 @@ export default async function PublicProductPage({ params }: Props) {
 
             {/* Right: Details & Checkout */}
             <div className="md:col-span-5 flex flex-col">
-              <div className="bg-surface-studio border border-outline-variant rounded-xl p-8 shadow-sm flex flex-col h-full sticky top-32">
+              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm flex flex-col h-full sticky top-32">
                 {/* Header & Price */}
-                <div className="mb-4 border-b border-outline-variant pb-4">
-                  <h1 className="font-[family-name:var(--font-geist)] text-[32px] md:text-[48px] font-bold text-on-surface mb-2 leading-tight">
+                <div className="mb-4 border-b border-gray-200 pb-4">
+                  <h1 className="text-[32px] md:text-[40px] font-bold text-[#141416] mb-2 leading-tight">
                     {product.name}
                   </h1>
-                  <p className="font-[family-name:var(--font-geist)] text-[24px] font-semibold text-secondary">
-                    {formatDisplayPrice(createMoney(product.price_amount))}
+                  <p className="text-[20px] font-semibold text-[#6e6e73]">
+                    {displayPrice}
                   </p>
                 </div>
 
                 {/* Description */}
-                <div className="mb-8 flex-grow">
+                <div className="mb-6 flex-grow">
                   {product.description && (
-                    <p className="text-[16px] leading-relaxed text-secondary mb-4">
+                    <p className="text-[15px] leading-relaxed text-[#6e6e73] mb-4">
                       {product.description}
                     </p>
                   )}
 
                   {/* Included Files */}
-                  <div className="bg-surface-container-low rounded-lg p-3 border border-outline-variant/50">
-                    <h3 className="text-[14px] font-medium text-on-surface mb-2 px-2 pt-1">
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200/50">
+                    <h3 className="text-[14px] font-medium text-[#141416] mb-2 px-2 pt-1">
                       Included Assets
                     </h3>
                     <ul className="flex flex-col gap-1">
                       {product.files.map((file) => (
                         <li
                           key={file.id}
-                          className="flex items-center gap-3 p-2 text-secondary rounded-md"
+                          className="flex items-center gap-3 p-2 text-[#6e6e73] rounded-md"
                         >
                           <span className="material-symbols-outlined text-[20px]">
                             {file.mime_type.startsWith("audio/")
@@ -164,22 +185,23 @@ export default async function PublicProductPage({ params }: Props) {
                   </div>
                 </div>
 
-                {/* Checkout Form */}
-                <CheckoutForm
-                  productId={product.id}
+                {/* Checkout Form (Mock) */}
+                <MockCheckoutClient
+                  productId={publicId}
                   productName={product.name}
+                  price={displayPrice}
                 />
 
                 {/* Trust Indicators */}
                 <div className="flex items-center justify-center gap-4 mt-4 opacity-80">
-                  <div className="flex items-center gap-1.5 text-secondary">
+                  <div className="flex items-center gap-1.5 text-[#6e6e73]">
                     <span className="material-symbols-outlined text-[16px]">
                       lock
                     </span>
                     <span className="text-[12px]">Secure checkout</span>
                   </div>
-                  <div className="w-1 h-1 rounded-full bg-outline-variant" />
-                  <div className="flex items-center gap-1.5 text-secondary">
+                  <div className="w-1 h-1 rounded-full bg-gray-300" />
+                  <div className="flex items-center gap-1.5 text-[#6e6e73]">
                     <span className="material-symbols-outlined text-[16px]">
                       bolt
                     </span>
@@ -193,4 +215,10 @@ export default async function PublicProductPage({ params }: Props) {
       </main>
     </>
   );
+}
+
+// Deterministic random for waveform
+function seededRandom(seed: number) {
+  const x = Math.sin(seed * 9301 + 49297) * 49297;
+  return x - Math.floor(x);
 }

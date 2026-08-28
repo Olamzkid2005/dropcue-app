@@ -18,7 +18,7 @@ export default function MarketingLayout({
               <img
                 src="/logo.png"
                 alt="Dropcue"
-                className="h-[72px] w-auto"
+                className="h-12 w-auto"
               />
             </Link>
             <nav className="hidden md:flex items-center gap-6">
@@ -89,7 +89,7 @@ export default function MarketingLayout({
                 <img
                   src="/logo.png"
                   alt="Dropcue"
-                  className="h-[72px] w-auto"
+                  className="h-12 w-auto"
                 />
               </Link>
               <p className="text-sm text-muted leading-relaxed">

@@ -123,7 +123,7 @@ export default function DownloadPage() {
           <img
             src="/logo.png"
             alt="Dropcue"
-            className="h-[72px] w-auto"
+            className="h-12 w-auto"
           />
         </header>
         <div className="flex flex-grow items-center justify-center px-4">
@@ -160,7 +160,7 @@ export default function DownloadPage() {
           <img
             src="/logo.png"
             alt="Dropcue"
-            className="h-[72px] w-auto"
+            className="h-12 w-auto"
           />
         </header>
         <div className="flex flex-grow items-center justify-center px-4 py-16">
@@ -203,7 +203,7 @@ export default function DownloadPage() {
           <img
             src="/logo.png"
             alt="Dropcue"
-            className="h-[72px] w-auto"
+            className="h-12 w-auto"
           />
         </header>
         <div className="flex flex-grow items-center justify-center px-4">
@@ -277,7 +277,7 @@ export default function DownloadPage() {
         <img
           src="/logo.png"
           alt="Dropcue"
-          className="h-[72px] w-auto"
+          className="h-12 w-auto"
         />
       </header>
 
