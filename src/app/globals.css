@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+/* Material Symbols */
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+
+/* Google Fonts - Geist & Inter */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Inter:wght@400;500;600&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent-indigo: var(--accent-indigo);
+  --color-on-surface: var(--on-surface);
+  --color-on-primary: var(--on-primary);
+  --color-secondary: var(--secondary);
+  --color-outline-variant: var(--outline-variant);
+  --color-outline: var(--outline);
+  --color-surface-studio: var(--surface-studio);
+  --color-surface-canvas: var(--surface-canvas);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-dim: var(--surface-dim);
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-success-green: var(--success-green);
+  --color-error-red: var(--error-red);
+  --color-error-container: var(--error-container);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.375rem;
+  --accent-indigo: #4338CA;
+  --on-surface: #0b1c30;
+  --on-primary: #ffffff;
+  --secondary: #5c5f61;
+  --outline-variant: #c5c6cd;
+  --outline: #75777d;
+  --surface-studio: #ffffff;
+  --surface-canvas: #f1f5f9;
+  --surface-container-low: #eff4ff;
+  --surface-container: #e5eeff;
+  --surface-container-high: #dce9ff;
+  --surface-container-highest: #d3e4fe;
+  --surface-bright: #f8f9ff;
+  --surface-dim: #cbdbf5;
+  --primary: #091426;
+  --primary-container: #1e293b;
+  --success-green: #10b981;
+  --error-red: #ef4444;
+  --error-container: #ffdad6;
+  --background: #f1f5f9;
+  --foreground: #0b1c30;
+  --border: #c5c6cd;
+  --ring: #4338ca;
+  --input: #c5c6cd;
+}
+
+/* Material Symbols base */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-outlined[data-weight="fill"] {
+  font-variation-settings: "FILL" 1;
+}
+
+/* Waveform bars */
+.waveform-bar {
+  width: 4px;
+  background-color: #bcc7de;
+  border-radius: 2px;
+  transition: height 0.1s ease, background-color 0.2s ease;
+}
+.waveform-bar.active {
+  background-color: #4338ca;
+}
+
+/* Animations */
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  80%, 100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoom-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.loading-pulse {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.3s ease-out;
+}
+
+/* Spinner */
+.spinner-border {
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Input styles */
+.input-base {
+  @apply flex h-10 w-full rounded-md border border-outline-variant bg-surface-studio px-3 py-2 text-sm ring-offset-surface-canvas file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-surface-canvas transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-accent-indigo text-on-primary hover:bg-accent-indigo/90 h-10 px-4 py-2;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-surface-canvas transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-surface-studio text-on-surface border border-outline-variant hover:bg-surface-container-low h-10 px-4 py-2;
+}
+
+body {
+  background-color: var(--surface-canvas);
+  color: var(--on-surface);
+  font-family: "Inter", sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: #c5c6cd; border-radius: 4px; }
+
+/* Line clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
