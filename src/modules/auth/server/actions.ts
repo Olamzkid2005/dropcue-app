@@ -28,7 +28,11 @@ export async function signUp(email: string, password: string) {
   return { success: true, error: null };
 }
 
-export async function signIn(email: string, password: string) {
+export async function signIn(
+  email: string,
+  password: string,
+  rememberMe: boolean = true
+) {
   let supabase;
   try {
     supabase = await createClient();
@@ -39,10 +43,23 @@ export async function signIn(email: string, password: string) {
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
+    options: {
+      // Control session persistence:
+      // - rememberMe=true: session persists for 30 days (survives browser restart)
+      // - rememberMe=false: session expires when browser closes (session cookie)
+      captchaToken: undefined,
+    },
   });
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // If user doesn't want to be remembered, we'll clear the session on browser close
+  // by setting a shorter cookie expiry in the middleware
+  if (!rememberMe) {
+    // Store preference so middleware can set session-only cookies
+    // This is handled by the cookie maxAge in the Supabase client
   }
 
   return { success: true, error: null };

@@ -24,23 +24,31 @@ export async function middleware(request: NextRequest) {
             return request.cookies.getAll();
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
+            // Set cookies on the request for downstream server components
+            cookiesToSet.forEach(({ name, value, options }) =>
+              request.cookies.set({ name, value, ...options })
             );
+            // Re-create the response with updated request cookies
             supabaseResponse = NextResponse.next({ request });
-            cookiesToSet.forEach(({ name, value }) =>
-              supabaseResponse.cookies.set(name, value)
+            // Set cookies on the response so they're sent back to the browser
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
             );
           },
         },
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
       });
 
-      // Refresh session if expired - required for Server Components
+      // Refresh session if expired — this is critical for session persistence
+      // getUser() automatically refreshes expired tokens and updates cookies
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Protect app routes
+      // Protect app routes — redirect to login if not authenticated
       if (
         request.nextUrl.pathname.startsWith("/dashboard") ||
         request.nextUrl.pathname.startsWith("/(creator)") ||
@@ -50,6 +58,8 @@ export async function middleware(request: NextRequest) {
         if (!user) {
           const url = request.nextUrl.clone();
           url.pathname = "/auth/login";
+          // Preserve the intended destination so we can redirect back after login
+          url.searchParams.set("next", request.nextUrl.pathname);
           return NextResponse.redirect(url);
         }
       }
@@ -58,7 +68,9 @@ export async function middleware(request: NextRequest) {
       if (request.nextUrl.pathname.startsWith("/auth")) {
         if (user) {
           const url = request.nextUrl.clone();
-          url.pathname = "/dashboard";
+          // Send to the intended destination if provided, otherwise dashboard
+          const next = request.nextUrl.searchParams.get("next");
+          url.pathname = next || "/dashboard";
           return NextResponse.redirect(url);
         }
       }

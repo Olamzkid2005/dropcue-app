@@ -3,8 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 /**
- * Creates a Supabase server client.
- * Returns null if Supabase credentials are not configured (placeholder mode).
+ * Creates a Supabase server client with proper cookie persistence.
+ * Sessions are stored in httpOnly cookies and persist across browser restarts.
  */
 export async function createClient(): Promise<SupabaseClient> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -16,7 +16,6 @@ export async function createClient(): Promise<SupabaseClient> {
     supabaseUrl.includes("placeholder") ||
     supabaseKey.includes("placeholder")
   ) {
-    // Return a mock-like client that won't crash — callers should check for this
     throw new Error(
       "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local"
     );
@@ -40,6 +39,14 @@ export async function createClient(): Promise<SupabaseClient> {
           // user sessions.
         }
       },
+    },
+    auth: {
+      // Persist sessions for 30 days by default
+      persistSession: true,
+      // Auto-refresh session before it expires
+      autoRefreshToken: true,
+      // Detect session from URL hash (for OAuth redirects)
+      detectSessionInUrl: true,
     },
   });
 }

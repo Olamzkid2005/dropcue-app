@@ -8,6 +8,13 @@ import { createProductSchema, updateProductSchema } from "../validations";
 import type { CreateProductInput, UpdateProductInput, Product, ProductWithFiles } from "../types";
 import { revalidatePath } from "next/cache";
 
+async function ensureCreator(supabase: ReturnType<typeof createClient> extends Promise<infer T> ? T : never, userId: string, email: string) {
+  const { data } = await supabase.from("creators").select("id").eq("id", userId).single();
+  if (!data) {
+    await supabase.from("creators").insert({ id: userId, email });
+  }
+}
+
 export async function createProduct(input: CreateProductInput) {
   const supabase = await createClient();
 
@@ -18,6 +25,9 @@ export async function createProduct(input: CreateProductInput) {
   if (!user) {
     return { success: false, error: "Not authenticated", product: null };
   }
+
+  // Ensure creator record exists (handles users who signed up before migration)
+  await ensureCreator(supabase, user.id, user.email ?? "");
 
   const parsed = createProductSchema.safeParse(input);
   if (!parsed.success) {
@@ -119,6 +129,48 @@ export async function updateProduct(productId: string, input: UpdateProductInput
   revalidatePath(`/products/${productId}`);
 
   return { success: true, error: null, product };
+}
+
+export async function deleteProduct(productId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // Verify ownership
+  const { data: existing } = await supabase
+    .from("products")
+    .select("id, creator_id, name")
+    .eq("id", productId)
+    .single();
+
+  if (!existing || existing.creator_id !== user.id) {
+    return { success: false, error: "Product not found" };
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  await logAuditEvent("product_deleted", "product", productId, {
+    name: existing.name,
+  });
+
+  revalidatePath("/");
+  revalidatePath("/products");
+  revalidatePath("/dashboard/products");
+
+  return { success: true, error: null };
 }
 
 export async function getProducts() {

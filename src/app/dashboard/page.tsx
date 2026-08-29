@@ -30,6 +30,7 @@ interface DashboardStats {
   activeProducts: number;
   totalOrders: number;
   recentOrders: Order[];
+  totalProducts: number;
 }
 
 function formatNaira(amountInKobo: number): string {
@@ -50,35 +51,317 @@ function timeAgo(dateStr: string): string {
   return `${diffDays}d ago`;
 }
 
+/* ──────────────────────────────────────────────
+   Empty State — Welcome / Onboarding
+   ────────────────────────────────────────────── */
+function WelcomeState({ userName }: { userName: string }) {
+  const steps = [
+    {
+      icon: "fa-solid fa-cloud-arrow-up",
+      title: "Upload your file",
+      desc: "Drag and drop audio, video, PDFs — we handle hosting and delivery.",
+    },
+    {
+      icon: "fa-solid fa-tag",
+      title: "Set your price",
+      desc: "Choose a fixed price in Naira. You control everything.",
+    },
+    {
+      icon: "fa-solid fa-share-nodes",
+      title: "Share one link",
+      desc: "Paste your link anywhere — socials, emails, or your bio.",
+    },
+    {
+      icon: "fa-solid fa-money-bill-wave",
+      title: "Get paid",
+      desc: "Buyers pay, you get notified, and the file ships automatically.",
+    },
+  ];
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 lg:py-24 max-w-[720px] mx-auto w-full">
+      {/* Hero icon */}
+      <div className="mb-8">
+        <img
+          src="/logo.png"
+          alt="Dropcue"
+          className="w-24 h-24 object-contain drop-shadow-lg"
+        />
+      </div>
+
+      {/* Heading */}
+      <h1 className="text-3xl lg:text-5xl font-semibold tracking-tight font-[family-name:var(--font-geist)] text-center mb-4">
+        Welcome to Dropcue{userName ? `, ${userName.split("@")[0]}` : ""}
+      </h1>
+      <p className="text-muted text-lg text-center max-w-md mb-10 leading-relaxed">
+        Upload, price, and share your digital products. Get paid instantly. It takes less than five minutes.
+      </p>
+
+      {/* Big CTA */}
+      <Link
+        href="/dashboard/products/new"
+        className="group flex items-center gap-3 bg-ink text-white px-8 py-4 rounded-2xl text-base font-medium hover:bg-ink/90 transition-all duration-300 shadow-jumbo hover:shadow-[0_20px_60px_rgba(20,20,22,0.25)] active:scale-[0.97] mb-12"
+      >
+        <i className="fa-solid fa-plus text-sm" />
+        Create Your First Product
+        <i className="fa-solid fa-arrow-right text-sm group-hover:translate-x-1 transition-transform" />
+      </Link>
+
+      {/* How it works */}
+      <div className="w-full">
+        <p className="text-xs uppercase tracking-widest text-muted font-semibold text-center mb-8">
+          How it works
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {steps.map((step, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-4 p-5 bg-surface rounded-2xl border border-hairline shadow-soft"
+            >
+              <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center shrink-0">
+                <i className={`${step.icon} text-accent text-sm`} />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium mb-0.5">{step.title}</h3>
+                <p className="text-xs text-muted leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust signals */}
+      <div className="flex items-center gap-6 mt-10 text-xs text-muted">
+        <span className="flex items-center gap-1.5">
+          <i className="fa-solid fa-shield-halved text-ink" />
+          Secure delivery
+        </span>
+        <span className="flex items-center gap-1.5">
+          <i className="fa-solid fa-bolt text-ink" />
+          Instant payouts
+        </span>
+        <span className="flex items-center gap-1.5">
+          <i className="fa-solid fa-naira-sign text-ink" />
+          Zero fees to start
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────
+   Dashboard — Stats, Actions, Orders
+   ────────────────────────────────────────────── */
+function DashboardView({ stats, loading }: { stats: DashboardStats; loading: boolean }) {
+  return (
+    <div className="flex-1 p-6 lg:p-10 max-w-[1200px] mx-auto w-full flex flex-col gap-10">
+      {/* Welcome */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl lg:text-4xl font-semibold tracking-tight font-[family-name:var(--font-geist)]">
+            Overview
+          </h2>
+          <p className="text-muted mt-2">
+            Here&apos;s what&apos;s happening with your products today.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/products/new"
+          className="flex items-center gap-2 bg-ink text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-ink/90 transition-all duration-200 active:scale-[0.98] w-fit"
+        >
+          <i className="fa-solid fa-plus text-xs" />
+          New Product
+        </Link>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-surface p-6 rounded-[var(--radius-jumbo)] shadow-soft border border-hairline group hover:shadow-jumbo transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-muted">Total Revenue</span>
+            <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
+              <i className="fa-solid fa-naira-sign text-accent" />
+            </div>
+          </div>
+          <div className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-geist)]">
+            {loading ? <div className="h-8 w-24 bg-hairline rounded-lg animate-pulse" /> : formatNaira(stats.totalRevenue)}
+          </div>
+          <p className="text-xs text-muted mt-2 flex items-center gap-1.5">
+            <i className="fa-solid fa-arrow-trend-up text-[10px]" />
+            From completed sales
+          </p>
+        </div>
+
+        <div className="bg-surface p-6 rounded-[var(--radius-jumbo)] shadow-soft border border-hairline group hover:shadow-jumbo transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-muted">Active Products</span>
+            <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
+              <i className="fa-solid fa-box-open text-accent" />
+            </div>
+          </div>
+          <div className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-geist)]">
+            {loading ? <div className="h-8 w-16 bg-hairline rounded-lg animate-pulse" /> : stats.activeProducts}
+          </div>
+          <p className="text-xs text-muted mt-2">Published and live</p>
+        </div>
+
+        <div className="bg-surface p-6 rounded-[var(--radius-jumbo)] shadow-soft border border-hairline group hover:shadow-jumbo transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-muted">Total Orders</span>
+            <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
+              <i className="fa-solid fa-receipt text-accent" />
+            </div>
+          </div>
+          <div className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-geist)]">
+            {loading ? <div className="h-8 w-16 bg-hairline rounded-lg animate-pulse" /> : stats.totalOrders}
+          </div>
+          <p className="text-xs text-muted mt-2">Across all products</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link
+          href="/dashboard/products/new"
+          className="flex items-center gap-4 p-5 bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline hover:shadow-jumbo hover:border-ink/20 transition-all group"
+        >
+          <div className="w-12 h-12 bg-ink text-white rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <i className="fa-solid fa-cloud-arrow-up" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium">Upload New Product</h3>
+            <p className="text-xs text-muted mt-0.5">Set price and share</p>
+          </div>
+        </Link>
+        <Link
+          href="/dashboard/products"
+          className="flex items-center gap-4 p-5 bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline hover:shadow-jumbo hover:border-ink/20 transition-all group"
+        >
+          <div className="w-12 h-12 bg-accent/10 text-accent rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <i className="fa-solid fa-box-open" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium">Manage Products</h3>
+            <p className="text-xs text-muted mt-0.5">Edit, view, and organize</p>
+          </div>
+        </Link>
+        <Link
+          href="/dashboard/orders"
+          className="flex items-center gap-4 p-5 bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline hover:shadow-jumbo hover:border-ink/20 transition-all group"
+        >
+          <div className="w-12 h-12 bg-green-500/10 text-green-600 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <i className="fa-solid fa-receipt" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium">View Orders</h3>
+            <p className="text-xs text-muted mt-0.5">Track sales and payouts</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* Recent Orders */}
+      <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
+        <div className="px-6 py-4 border-b border-hairline flex items-center justify-between">
+          <h3 className="text-base font-semibold font-[family-name:var(--font-geist)]">Recent Orders</h3>
+          <Link href="/dashboard/orders" className="text-sm font-medium text-accent hover:underline">
+            View All
+          </Link>
+        </div>
+        <div className="divide-y divide-hairline">
+          {loading ? (
+            <div className="p-8 flex items-center justify-center">
+              <div className="flex items-center gap-3 text-muted text-sm">
+                <i className="fa-solid fa-spinner fa-spin" />
+                Loading orders...
+              </div>
+            </div>
+          ) : stats.recentOrders.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="w-16 h-16 bg-hairline/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="fa-solid fa-receipt text-2xl text-muted" />
+              </div>
+              <h4 className="text-base font-medium mb-1">No orders yet</h4>
+              <p className="text-sm text-muted">
+                Orders will appear here once buyers purchase your products.
+              </p>
+            </div>
+          ) : (
+            stats.recentOrders.map((order) => (
+              <div
+                key={order.id}
+                className="px-6 py-4 flex items-center justify-between hover:bg-paper/50 transition-colors"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                    <i
+                      className={`fa-solid text-sm ${
+                        order.status === "paid"
+                          ? "fa-circle-check text-green-500"
+                          : "fa-clock text-amber-500"
+                      }`}
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {order.products?.name ?? "Product"}
+                    </p>
+                    <p className="text-xs text-muted truncate">
+                      {order.buyer_email} · {timeAgo(order.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <span className="text-sm font-semibold">{formatNaira(order.amount)}</span>
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                      order.status === "paid"
+                        ? "bg-green-50 text-green-700"
+                        : order.status === "pending"
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────
+   Main Dashboard Page
+   ────────────────────────────────────────────── */
 export default function DashboardPage() {
-  const [activeNav, setActiveNav] = useState("dashboard");
   const [stats, setStats] = useState<DashboardStats>({
     totalRevenue: 0,
     activeProducts: 0,
     totalOrders: 0,
     recentOrders: [],
+    totalProducts: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     async function loadDashboard() {
       try {
         const supabase = createClient();
-
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setLoading(false);
-          return;
-        }
+        if (!user) return;
 
-        // Fetch products
+        setUserName(user.email ?? "");
+
         const { data: products } = await supabase
           .from("products")
           .select("*")
           .eq("creator_id", user.id)
           .order("created_at", { ascending: false });
 
-        // Fetch orders for user's products
         const productIds = (products ?? []).map((p: Product) => p.id);
         let recentOrders: Order[] = [];
 
@@ -89,7 +372,6 @@ export default function DashboardPage() {
             .in("product_id", productIds)
             .order("created_at", { ascending: false })
             .limit(10);
-
           recentOrders = (orders ?? []) as Order[];
         }
 
@@ -106,6 +388,7 @@ export default function DashboardPage() {
           activeProducts,
           totalOrders: recentOrders.length,
           recentOrders,
+          totalProducts: (products ?? []).length,
         });
       } catch (err) {
         console.error("Failed to load dashboard:", err);
@@ -113,271 +396,51 @@ export default function DashboardPage() {
         setLoading(false);
       }
     }
-
     loadDashboard();
   }, []);
 
-  const navItems = [
-    { id: "dashboard", icon: "dashboard", label: "Dashboard", href: "/dashboard" },
-    { id: "catalog", icon: "library_music", label: "Catalog", href: "/dashboard" },
-    { id: "sales", icon: "payments", label: "Sales", href: "/dashboard" },
-    { id: "analytics", icon: "bar_chart", label: "Analytics", href: "/dashboard" },
-    { id: "settings", icon: "settings", label: "Settings", href: "/dashboard" },
-  ];
+  const hasProducts = stats.totalProducts > 0;
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] flex">
-      {/* Side Navigation */}
-      <nav className="hidden md:flex flex-col fixed left-0 top-0 h-screen p-4 bg-[#F1F5F9] border-r border-gray-200 w-64 z-40">
-        {/* Logo & Brand */}
-        <div className="flex items-center gap-3 mb-8 px-2">
-          <Link href="/">
-            <img
-              src="/logo.png"
-              alt="Dropcue"
-              className="h-8 w-8 object-contain rounded-md"
-            />
-          </Link>
-          <div>
-            <h2 className="font-semibold text-[18px] text-[#4338CA]">Creator Hub</h2>
-            <p className="text-[12px] text-[#5c5f61]">Pro Account</p>
-          </div>
-        </div>
-
-        {/* New Release Button */}
-        <Link
-          href="/products/new"
-          className="mb-8 w-full bg-[#4338CA] hover:bg-[#18008f] text-white text-[14px] font-medium py-2 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
-        >
-          <span className="material-symbols-outlined text-sm">add</span>
-          New Product
-        </Link>
-
-        {/* Main Nav */}
-        <div className="flex-1 flex flex-col gap-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveNav(item.id);
-              }}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 ${
-                activeNav === item.id
-                  ? "bg-white text-[#4338CA] shadow-sm"
-                  : "text-[#5c5f61] hover:text-[#0b1c30] hover:bg-gray-100"
-              }`}
-            >
-              <span className={`material-symbols-outlined ${activeNav === "dashboard" ? "filled" : ""}`}>
-                {item.icon}
-              </span>
-              <span className="text-[14px] font-medium">{item.label}</span>
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-paper/90 backdrop-blur-xl border-b border-hairline">
+        <div className="flex items-center justify-between h-16 px-6 lg:px-10 max-w-[1200px] mx-auto">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="lg:hidden flex items-center gap-2">
+              <img src="/logo.png" alt="Dropcue" className="h-8 w-auto" />
             </Link>
-          ))}
-        </div>
-
-        {/* Bottom Nav */}
-        <div className="mt-auto flex flex-col gap-1 pt-4 border-t border-gray-200">
-          <a
-            href="https://dropcue.co/help"
-            className="flex items-center gap-3 px-3 py-2 text-[#5c5f61] hover:text-[#0b1c30] hover:bg-gray-100 rounded-xl transition-all duration-200"
-          >
-            <span className="material-symbols-outlined">help</span>
-            <span className="text-[14px] font-medium">Support</span>
-          </a>
-          <button
-            onClick={async () => {
-              const supabase = createClient();
-              await supabase.auth.signOut();
-              window.location.href = "/";
-            }}
-            className="flex items-center gap-3 px-3 py-2 text-[#5c5f61] hover:text-[#0b1c30] hover:bg-gray-100 rounded-xl transition-all duration-200"
-          >
-            <span className="material-symbols-outlined">logout</span>
-            <span className="text-[14px] font-medium">Sign Out</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 h-16 flex items-center justify-between lg:px-8">
-          {/* Mobile Logo */}
-          <div className="flex items-center gap-4 md:hidden">
-            <Link href="/">
-              <img src="/logo.png" alt="Dropcue" className="h-8 object-contain" />
-            </Link>
+            <h1 className="text-lg font-semibold font-[family-name:var(--font-geist)]">
+              {loading ? "Dropcue" : hasProducts ? "Dashboard" : "Dropcue"}
+            </h1>
           </div>
-
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md items-center relative">
-            <span className="material-symbols-outlined absolute left-3 text-[#5c5f61] text-lg">search</span>
-            <input
-              type="text"
-              placeholder="Search products, sales..."
-              className="w-full pl-10 pr-4 py-2 bg-[#F1F5F9] border border-gray-200 rounded-xl text-[14px] font-medium focus:outline-none focus:border-[#4338CA] focus:ring-1 focus:ring-[#4338CA] transition-shadow"
-            />
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-4 ml-auto">
-            <button className="text-[#5c5f61] hover:text-[#4338CA] transition-colors p-2 rounded-full hover:bg-gray-100">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <div className="h-8 w-8 rounded-full bg-gray-200 border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center">
-              <span className="material-symbols-outlined text-[#4338CA] text-sm">person</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <div className="flex-1 p-6 lg:p-8 max-w-[1120px] mx-auto w-full flex flex-col gap-16">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <h1 className="text-[32px] md:text-[48px] font-bold text-[#0b1c30] leading-tight tracking-tight">
-                Overview
-              </h1>
-              <p className="text-[18px] text-[#5c5f61] mt-2">
-                Here&apos;s what&apos;s happening with your products today.
-              </p>
-            </div>
-            <Link
-              href="/products/new"
-              className="bg-[#4338CA] text-white text-[14px] font-medium px-6 py-3 rounded-xl hover:bg-[#18008f] transition-colors shadow-sm flex items-center gap-2 w-fit"
-            >
-              <span className="material-symbols-outlined">add</span>
-              Create Product
-            </Link>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Total Sales Revenue */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-[#4338CA] transition-colors">
-              <div className="flex justify-between items-start">
-                <span className="text-[14px] font-medium text-[#5c5f61]">Total Revenue</span>
-                <span className="material-symbols-outlined text-[#5c5f61] text-sm">trending_up</span>
-              </div>
-              <div>
-                <div className="text-[24px] font-semibold text-[#0b1c30]">
-                  {loading ? "---" : formatNaira(stats.totalRevenue)}
-                </div>
-                <div className="text-[12px] text-[#10B981] mt-1 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
-                  From completed sales
-                </div>
-              </div>
-              <div className="absolute bottom-0 left-0 w-full h-12 opacity-20 bg-gradient-to-t from-[#4338CA] to-transparent translate-y-4 group-hover:translate-y-0 transition-transform" />
-            </div>
-
-            {/* Active Products */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-[#4338CA] transition-colors">
-              <div className="flex justify-between items-start">
-                <span className="text-[14px] font-medium text-[#5c5f61]">Active Products</span>
-                <span className="material-symbols-outlined text-[#5c5f61] text-sm">inventory_2</span>
-              </div>
-              <div>
-                <div className="text-[24px] font-semibold text-[#0b1c30]">
-                  {loading ? "---" : stats.activeProducts}
-                </div>
-                <div className="text-[12px] text-[#5c5f61] mt-1">Published and live</div>
-              </div>
-            </div>
-
-            {/* Total Orders */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group hover:border-[#4338CA] transition-colors">
-              <div className="flex justify-between items-start">
-                <span className="text-[14px] font-medium text-[#5c5f61]">Total Orders</span>
-                <span className="material-symbols-outlined text-[#5c5f61] text-sm">group</span>
-              </div>
-              <div>
-                <div className="text-[24px] font-semibold text-[#0b1c30]">
-                  {loading ? "---" : stats.totalOrders}
-                </div>
-                <div className="text-[12px] text-[#5c5f61] mt-1">Across all products</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Latest Sales */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-[#F1F5F9]/50">
-              <h3 className="text-[18px] font-semibold text-[#0b1c30]">Latest Orders</h3>
-              <Link href="/dashboard" className="text-[14px] font-medium text-[#4338CA] hover:underline">
-                View All
+          {hasProducts && (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard/products/new"
+                className="flex items-center gap-2 bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-ink/90 transition-all duration-200 active:scale-[0.98]"
+              >
+                <i className="fa-solid fa-plus text-xs" />
+                <span className="hidden sm:inline">New Product</span>
               </Link>
             </div>
-            <div className="flex flex-col divide-y divide-gray-200">
-              {loading ? (
-                <div className="p-8 text-center text-[#5c5f61] text-[14px]">
-                  Loading orders...
-                </div>
-              ) : stats.recentOrders.length === 0 ? (
-                <div className="p-8 text-center">
-                  <span className="material-symbols-outlined text-[#5c5f61] text-[48px] mb-2 block">
-                    receipts
-                  </span>
-                  <p className="text-[16px] font-medium text-[#0b1c30] mb-1">No orders yet</p>
-                  <p className="text-[14px] text-[#5c5f61]">
-                    Create your first product to start receiving orders.
-                  </p>
-                </div>
-              ) : (
-                stats.recentOrders.map((sale) => (
-                  <div key={sale.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-[#4338CA]/10 flex items-center justify-center border border-gray-200">
-                        <span className="material-symbols-outlined text-[#4338CA]">
-                          {sale.status === "paid" ? "check_circle" : "schedule"}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-semibold text-[#0b1c30]">
-                          {sale.products?.name ?? "Product"}
-                        </p>
-                        <p className="text-[12px] text-[#5c5f61]">
-                          {sale.buyer_email} &bull; {timeAgo(sale.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-[13px] font-semibold text-[#0b1c30]">
-                        {formatNaira(sale.amount)}
-                      </span>
-                      <span
-                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                          sale.status === "paid"
-                            ? "bg-green-50 text-green-700"
-                            : sale.status === "pending"
-                              ? "bg-yellow-50 text-yellow-700"
-                              : "bg-red-50 text-red-700"
-                        }`}
-                      >
-                        {sale.status}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Conditional render: empty state or dashboard */}
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <i className="fa-solid fa-spinner fa-spin text-2xl text-muted" />
+            <p className="text-sm text-muted">Loading your dashboard...</p>
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="w-full py-8 px-6 flex flex-col md:flex-row justify-between items-center gap-4 bg-[#F1F5F9] border-t border-gray-200 mt-auto">
-          <p className="text-[12px] text-[#5c5f61]">&copy; 2024 Dropcue. Premium Digital Delivery.</p>
-          <div className="flex gap-4">
-            {["Terms", "Privacy", "Help Center", "API"].map((link) => (
-              <a key={link} href="#" className="text-[12px] text-[#5c5f61] hover:text-[#4338CA] transition-colors">
-                {link}
-              </a>
-            ))}
-          </div>
-        </footer>
-      </main>
+      ) : !hasProducts ? (
+        <WelcomeState userName={userName} />
+      ) : (
+        <DashboardView stats={stats} loading={loading} />
+      )}
     </div>
   );
 }
