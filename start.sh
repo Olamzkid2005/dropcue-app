@@ -101,17 +101,22 @@ header "Database Check"
 if grep -q 'SUPABASE_SERVICE_ROLE_KEY=.[^ ]' .env.local 2>/dev/null; then
   ok "Supabase service role key configured"
 
-  # Quick connectivity test
+  # Quick connectivity test — retried once to avoid false negatives on
+  # slow TLS handshakes or transient DNS hiccups
   SUPABASE_URL=$(grep 'NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d'=' -f2- | tr -d '\r')
   if [ -n "$SUPABASE_URL" ]; then
-    if curl -s --connect-timeout 5 --max-time 10 \
-      -H "apikey: $(grep 'SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d'=' -f2- | tr -d '\r')" \
-      -H "Authorization: Bearer $(grep 'SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d'=' -f2- | tr -d '\r')" \
-      "${SUPABASE_URL}/rest/v1/products?select=id&limit=1" \
-      -o /dev/null -w "%{http_code}" 2>/dev/null | grep -qE '200|404'; then
+    KEY=$(grep 'SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d'=' -f2- | tr -d '\r')
+    probe_db() {
+      curl -s --connect-timeout 10 --max-time 20 \
+        -H "apikey: $KEY" \
+        -H "Authorization: Bearer $KEY" \
+        "${SUPABASE_URL}/rest/v1/products?select=id&limit=1" \
+        -o /dev/null -w "%{http_code}" 2>/dev/null | grep -qE '200|404'
+    }
+    if probe_db || { sleep 2; probe_db; }; then
       ok "Supabase reachable at ${SUPABASE_URL}"
     else
-      warn "Supabase unreachable — check your project is active"
+      warn "Supabase unreachable after 2 attempts — check your project is active"
     fi
   fi
 else

@@ -160,8 +160,12 @@ export default function MarketingHomePage() {
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_5c6aef006b_5fbf7ed975a77f02.png"
+                  src="/marketing/creator-music.jpg"
                   alt="music producer working at a laptop in a dim studio, headphones around neck, moody cinematic lighting"
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex items-start gap-3">
@@ -178,8 +182,12 @@ export default function MarketingHomePage() {
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_0c177620c4_66a8b87350dca01c.png"
+                  src="/marketing/creator-photo.jpg"
                   alt="photographer reviewing portfolio on a tablet in a bright minimalist workspace, natural light"
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex items-start gap-3">
@@ -196,8 +204,12 @@ export default function MarketingHomePage() {
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_62e714ee1f_768416ea97bf03da.png"
+                  src="/marketing/creator-design.jpg"
                   alt="graphic designer sketching on a tablet at a clean desk, modern interior, soft daylight"
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex items-start gap-3">
@@ -214,8 +226,12 @@ export default function MarketingHomePage() {
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_62d66394ea_baabfcf4cbe2adad.png"
+                  src="/marketing/creator-video.jpg"
                   alt="video editor at a dual-monitor editing suite, focused expression, dark cinematic room"
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex items-start gap-3">
@@ -232,8 +248,12 @@ export default function MarketingHomePage() {
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_d86383145e_cf0b624750471282.png"
+                  src="/marketing/creator-course.jpg"
                   alt="online course creator recording a lesson on a phone tripod in a cozy home office, warm tones"
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex items-start gap-3">
@@ -250,8 +270,12 @@ export default function MarketingHomePage() {
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <img
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_c7892e482e_d30957ffc16efd89.png"
+                  src="/marketing/creator-writer.jpg"
                   alt="writer typing on a laptop beside a notebook and coffee in a sunlit room, calm atmosphere"
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex items-start gap-3">
@@ -276,15 +300,23 @@ export default function MarketingHomePage() {
             <div className="relative bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden">
               <img
                 className="w-full"
-                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_c8ebf89770_0b41853a99e41fb6.png"
+                src="/marketing/showcase-ui.jpg"
                 alt="clean minimal web app dashboard UI mockup of a digital storefront showing product listings, sales stats"
+                width={1024}
+                height={1024}
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 w-48 aspect-video bg-surface rounded-2xl shadow-jumbo border border-hairline p-3 hidden lg:block">
               <img
                 className="w-full h-full object-cover rounded-xl"
-                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_5932d3c315_bfb75b90956babb7.png"
+                src="/marketing/showcase-device.jpg"
                 alt="sleek compact digital drive device product render without background, soft studio lighting"
+                width={1024}
+                height={1024}
+                loading="lazy"
+                decoding="async"
               />
             </div>
           </div>

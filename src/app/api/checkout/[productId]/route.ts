@@ -48,11 +48,12 @@ export async function POST(
       );
     }
 
-    // Get product details
+    // Get product details (single fetch — public_id included so we don't
+    // re-fetch it later for the cancel_url)
     const supabase = await createClient();
     const { data: product } = await supabase
       .from("products")
-      .select("id, name, price_amount, currency, status")
+      .select("id, name, price_amount, currency, status, public_id")
       .eq("id", productId)
       .single();
 
@@ -67,27 +68,15 @@ export async function POST(
       );
     }
 
-    // Check files exist
-    const { count } = await supabase
-      .from("files")
-      .select("*", { count: "exact", head: true })
-      .eq("product_id", productId)
-      .eq("status", "uploaded");
-
-    if (!count || count === 0) {
-      return Response.json(
-        { error: "No files available for this product" },
-        { status: 400 }
-      );
-    }
-
-    // Create order
+    // Create order — createOrder validates file availability itself,
+    // and skips its own product re-fetch since we pass the verified product.
     const { order, error: orderError } = await createOrder({
       product_id: productId,
       buyer_email,
       payment_provider,
       amount: product.price_amount,
       currency: product.currency,
+      product: { id: product.id, status: product.status },
     });
 
     if (!order) {
@@ -104,7 +93,7 @@ export async function POST(
       product_name: product.name,
       buyer_email,
       success_url: `${baseUrl}/payment/success?order_id=${order.id}`,
-      cancel_url: `${baseUrl}/p/${(await supabase.from("products").select("public_id").eq("id", productId).single()).data?.public_id}`,
+      cancel_url: `${baseUrl}/p/${product.public_id}`,
       webhook_url: `${baseUrl}/api/webhooks/${payment_provider}`,
     });
 

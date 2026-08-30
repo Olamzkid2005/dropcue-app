@@ -131,7 +131,7 @@ export async function updateProduct(productId: string, input: UpdateProductInput
   return { success: true, error: null, product };
 }
 
-export async function deleteProduct(productId: string) {
+export async function deleteProduct(productId: string, permanent = false) {
   const supabase = await createClient();
 
   const {
@@ -153,18 +153,40 @@ export async function deleteProduct(productId: string) {
     return { success: false, error: "Product not found" };
   }
 
-  const { error } = await supabase
-    .from("products")
-    .delete()
-    .eq("id", productId);
+  if (permanent) {
+    const { data, error } = await supabase.rpc("permanently_delete_product", {
+      p_product_id: productId,
+    });
 
-  if (error) {
-    return { success: false, error: error.message };
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    if (!data) {
+      return { success: false, error: "Product could not be permanently deleted" };
+    }
+
+    await logAuditEvent("product_deleted", "product", productId, {
+      name: existing.name,
+      requested_action: "permanent_delete",
+    });
+  } else {
+    // Purchased products remain financial history. Archive by default so
+    // existing orders and delivery records keep their product reference.
+    const { error } = await supabase
+      .from("products")
+      .update({ status: "archived" })
+      .eq("id", productId)
+      .eq("creator_id", user.id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    await logAuditEvent("product_archived", "product", productId, {
+      name: existing.name,
+      requested_action: "delete",
+    });
   }
-
-  await logAuditEvent("product_deleted", "product", productId, {
-    name: existing.name,
-  });
 
   revalidatePath("/");
   revalidatePath("/products");

@@ -18,15 +18,21 @@ export async function createOrder(params: {
   payment_provider: string;
   amount: number; // In kobo
   currency: string;
+  /** Pre-fetched by the caller to skip a redundant product round-trip */
+  product?: { id: string; status: string } | null;
 }): Promise<{ order: Order | null; error: string | null }> {
   const admin = createAdminClient();
 
-  // Verify product exists and is purchasable
-  const { data: product } = await admin
-    .from("products")
-    .select("id, status, price_amount")
-    .eq("id", params.product_id)
-    .single();
+  // Verify product exists and is purchasable (skip fetch if caller verified)
+  let product = params.product ?? null;
+  if (!product) {
+    const { data } = await admin
+      .from("products")
+      .select("id, status, price_amount")
+      .eq("id", params.product_id)
+      .single();
+    product = data ?? null;
+  }
 
   if (!product) {
     return { order: null, error: "Product not found" };
@@ -84,24 +90,23 @@ export async function fulfillOrder(params: {
 }): Promise<{ success: boolean; error: string | null }> {
   const admin = createAdminClient();
 
-  // Lock the order row to prevent concurrent fulfillment
-  const { data: order, error: lockError } = await admin
+  // Read the order details once, then claim it atomically. The conditional
+  // update is the concurrency guard: only one webhook can transition a
+  // pending order to paid, so only that request may create a delivery.
+  const { data: order, error: orderError } = await admin
     .from("orders")
-    .select("id, status, product_id")
+    .select("id, status, product_id, buyer_email, products(name)")
     .eq("id", params.order_id)
-    .eq("status", "pending")
     .single();
 
-  if (lockError || !order) {
-    // Order not found or already fulfilled
+  if (orderError || !order) {
     return {
       success: false,
-      error: lockError?.message ?? "Order not found or already processed",
+      error: orderError?.message ?? "Order not found",
     };
   }
 
-  // Mark order as paid
-  const { error: updateError } = await admin
+  const { data: claimedOrder, error: updateError } = await admin
     .from("orders")
     .update({
       status: "paid",
@@ -109,7 +114,14 @@ export async function fulfillOrder(params: {
       provider_session_id: params.provider_session_id,
       paid_at: new Date().toISOString(),
     })
-    .eq("id", params.order_id);
+    .eq("id", params.order_id)
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
+
+  if (!claimedOrder && !updateError) {
+    return { success: false, error: "Order already processed" };
+  }
 
   if (updateError) {
     return { success: false, error: updateError.message };
@@ -147,35 +159,29 @@ export async function fulfillOrder(params: {
     provider: params.provider,
   });
 
-  // Send purchase-ready email (async, don't block webhook response)
-  try {
-    const { sendPurchaseReadyEmail } = await import("@/modules/notifications/server/actions");
-    const { data: fullOrder } = await admin
-      .from("orders")
-      .select("buyer_email, payment_reference")
-      .eq("id", params.order_id)
-      .single();
+  /* Send purchase-ready email — fire-and-forget so the webhook responds
+     immediately (email failures are logged, never block fulfillment).
+     Note: on serverless platforms unawaited work can be cut short after the
+     response; on a long-running node server (next dev / next start) it's safe. */
+  void (async () => {
+    try {
+      const { sendPurchaseReadyEmail } = await import("@/modules/notifications/server/actions");
+      const productName = (order as unknown as { products?: { name: string } | null })?.products?.name;
 
-    const { data: product } = await admin
-      .from("products")
-      .select("name")
-      .eq("id", order.product_id)
-      .single();
-
-    if (fullOrder && product) {
-      await sendPurchaseReadyEmail({
-        order_id: params.order_id,
-        buyer_email: fullOrder.buyer_email,
-        product_name: product.name,
-        delivery_token: deliveryToken,
-        expires_at: expiresAt,
-        payment_reference: fullOrder.payment_reference ?? params.payment_reference,
-      });
+      if (order.buyer_email && productName) {
+        await sendPurchaseReadyEmail({
+          order_id: params.order_id,
+          buyer_email: order.buyer_email,
+          product_name: productName,
+          delivery_token: deliveryToken,
+          expires_at: expiresAt,
+          payment_reference: params.payment_reference,
+        });
+      }
+    } catch (emailErr) {
+      console.error("Failed to send purchase email:", emailErr);
     }
-  } catch (emailErr) {
-    // Email failure doesn't block fulfillment
-    console.error("Failed to send purchase email:", emailErr);
-  }
+  })();
 
   return { success: true, error: null };
 }
@@ -188,19 +194,19 @@ export async function getOrderWithDelivery(
 ): Promise<{ order: Order | null; delivery_token: string | null }> {
   const admin = createAdminClient();
 
+  // Single round-trip: order + its delivery token via embed
   const { data: order } = await admin
     .from("orders")
-    .select("*")
+    .select("*, deliveries(delivery_token)")
     .eq("id", orderId)
     .single();
 
   if (!order) return { order: null, delivery_token: null };
 
-  const { data: delivery } = await admin
-    .from("deliveries")
-    .select("delivery_token")
-    .eq("order_id", orderId)
-    .single();
-
-  return { order, delivery_token: delivery?.delivery_token ?? null };
+  return {
+    order: order as unknown as Order,
+    delivery_token:
+      (order as { deliveries?: Array<{ delivery_token: string } | null> })
+        .deliveries?.[0]?.delivery_token ?? null,
+  };
 }

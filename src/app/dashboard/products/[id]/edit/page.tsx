@@ -28,6 +28,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePermanently, setDeletePermanently] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({
@@ -94,7 +95,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   async function handleDelete() {
     setIsDeleting(true);
-    const result = await deleteProduct(id);
+    const result = await deleteProduct(id, deletePermanently);
     if (result.success) {
       router.push("/dashboard/products");
     } else {
@@ -345,8 +346,20 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               Delete Product?
             </h3>
             <p className="text-sm text-muted text-center mb-6">
-              This will permanently delete <strong>{product.name}</strong> and all its files. This action cannot be undone.
+              {deletePermanently
+                ? <>This permanently deletes <strong>{product.name}</strong>. This is only available if it has no orders.</>
+                : <>This will archive <strong>{product.name}</strong> and hide it from buyers. Existing orders and download history will be preserved.</>}
             </p>
+            <label className="flex items-start gap-3 mb-6 text-sm text-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={deletePermanently}
+                onChange={(e) => setDeletePermanently(e.target.checked)}
+                disabled={isDeleting}
+                className="mt-0.5 rounded border-hairline text-red-600 focus:ring-red-500"
+              />
+              <span><strong className="text-red-600">Permanently delete</strong> instead of archive. This will fail if the product has orders.</span>
+            </label>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}

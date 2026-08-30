@@ -33,6 +33,25 @@ interface DashboardStats {
   totalProducts: number;
 }
 
+/* Shape returned by the get_creator_stats() RPC — one round-trip for
+   all dashboard stats (see supabase/migrations/002_dashboard_stats_rpc.sql) */
+interface CreatorStatsRpc {
+  total_revenue: number | string | null;
+  total_orders: number | string | null;
+  total_products: number | string | null;
+  active_products: number | string | null;
+  recent_orders:
+    | Array<{
+        id: string;
+        buyer_email: string;
+        amount: number;
+        status: string;
+        created_at: string;
+        product_name: string;
+      }>
+    | null;
+}
+
 function formatNaira(amountInKobo: number): string {
   const naira = amountInKobo / 100;
   return `\u20A6${naira.toLocaleString("en-NG")}`;
@@ -356,39 +375,63 @@ export default function DashboardPage() {
 
         setUserName(user.email ?? "");
 
-        const { data: products } = await supabase
-          .from("products")
-          .select("*")
-          .eq("creator_id", user.id)
-          .order("created_at", { ascending: false });
+        /* ── Preferred path: ONE round-trip via RPC ──────────────────
+           Correct revenue (ALL paid orders) + exact order count. */
+        const { data: rpcData, error: rpcError } = await supabase
+          .rpc("get_creator_stats")
+          .single();
 
-        const productIds = (products ?? []).map((p: Product) => p.id);
-        let recentOrders: Order[] = [];
-
-        if (productIds.length > 0) {
-          const { data: orders } = await supabase
-            .from("orders")
-            .select("*, products(name)")
-            .in("product_id", productIds)
-            .order("created_at", { ascending: false })
-            .limit(10);
-          recentOrders = (orders ?? []) as Order[];
+        if (!rpcError && rpcData) {
+          const row = rpcData as CreatorStatsRpc;
+          setStats({
+            totalRevenue: Number(row.total_revenue ?? 0),
+            activeProducts: Number(row.active_products ?? 0),
+            totalOrders: Number(row.total_orders ?? 0),
+            totalProducts: Number(row.total_products ?? 0),
+            recentOrders: (row.recent_orders ?? []).map(
+              (r): Order => ({
+                id: r.id,
+                product_id: "",
+                buyer_email: r.buyer_email,
+                amount: Number(r.amount),
+                currency: "NGN",
+                status: r.status,
+                created_at: r.created_at,
+                products: { name: r.product_name },
+              })
+            ),
+          });
+          return;
         }
 
-        const activeProducts = (products ?? []).filter(
-          (p: Product) => p.status === "published"
-        ).length;
+        /* ── Fallback: 2 consolidated queries (RPC not installed yet) ──
+           Single join query for ALL orders (correct revenue/count),
+           one slim query for product statuses. */
+        const [{ data: orders }, { data: products }] = await Promise.all([
+          supabase
+            .from("orders")
+            .select(
+              "id, product_id, buyer_email, amount, currency, status, created_at, products!inner(name)"
+            )
+            .eq("products.creator_id", user.id)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("products")
+            .select("id, status")
+            .eq("creator_id", user.id),
+        ]);
 
-        const totalRevenue = recentOrders
-          .filter((o: Order) => o.status === "paid")
-          .reduce((sum: number, o: Order) => sum + o.amount, 0);
+        const allOrders = (orders ?? []) as unknown as Order[];
+        const allProducts = (products ?? []) as Product[];
 
         setStats({
-          totalRevenue,
-          activeProducts,
-          totalOrders: recentOrders.length,
-          recentOrders,
-          totalProducts: (products ?? []).length,
+          totalRevenue: allOrders
+            .filter((o) => o.status === "paid")
+            .reduce((sum, o) => sum + o.amount, 0),
+          activeProducts: allProducts.filter((p) => p.status === "published").length,
+          totalOrders: allOrders.length,
+          recentOrders: allOrders.slice(0, 10),
+          totalProducts: allProducts.length,
         });
       } catch (err) {
         console.error("Failed to load dashboard:", err);

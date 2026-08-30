@@ -54,10 +54,10 @@ export async function resolveDeliveryToken(
     };
   }
 
-  // 5. Get order
+  // 5. Fetch order + product + files in ONE round-trip (nested embed)
   const { data: order } = await admin
     .from("orders")
-    .select("*")
+    .select("*, products(*, files(*))")
     .eq("id", delivery.order_id)
     .single();
 
@@ -65,26 +65,28 @@ export async function resolveDeliveryToken(
     return { delivery: null, status: "processing" };
   }
 
-  // 6. Get product
-  const { data: product } = await admin
-    .from("products")
-    .select("id, name, description, creator_id")
-    .eq("id", order.product_id)
-    .single();
+  const product = order.products as
+    | {
+        id: string;
+        name: string;
+        description: string | null;
+        creator_id: string;
+        files: DeliveryFile[] | null;
+      }
+    | null;
 
   if (!product) {
     return { delivery: null, status: "files_unavailable" };
   }
 
-  // 7. Get files (only active, non-expired)
-  const { data: files } = await admin
-    .from("files")
-    .select("*")
-    .eq("product_id", product.id)
-    .eq("status", "uploaded")
-    .or("expires_at.is.null,expires_at.gt.now()");
-
-  const activeFiles = (files ?? []) as DeliveryFile[];
+  // Filter active files client-side (same semantics as the old SQL filter:
+  // status = 'uploaded' AND (expires_at IS NULL OR expires_at > now))
+  const allFiles = (product.files ?? []) as DeliveryFile[];
+  const activeFiles = allFiles.filter(
+    (f) =>
+      f.status === "uploaded" &&
+      (!f.expires_at || new Date(f.expires_at) > new Date())
+  );
 
   if (activeFiles.length === 0) {
     return { delivery: null, status: "files_unavailable" };
@@ -94,7 +96,12 @@ export async function resolveDeliveryToken(
     delivery: {
       ...delivery,
       order,
-      product,
+      product: {
+        id: product.id,
+        name: product.name,
+        description: product.description ?? null,
+        creator_id: product.creator_id,
+      },
       files: activeFiles,
     },
     status: "ready",
@@ -132,14 +139,12 @@ export async function generateFileDownloadUrl(
       { expires_in: SIGNED_URL_EXPIRY_SECONDS }
     );
 
-    // Increment download count
+    // Atomic increment — SQL-side, guarded by max_downloads (replaces the
+    // read-modify-write pattern that loses counts under concurrent downloads)
     const admin = createAdminClient();
-    await admin
-      .from("deliveries")
-      .update({
-        download_count: delivery.download_count + 1,
-      })
-      .eq("id", delivery.id);
+    await admin.rpc("increment_delivery_downloads", {
+      p_delivery_id: delivery.id,
+    });
 
     await logAuditEvent("download_requested", "delivery", delivery.id, {
       file_id: fileId,
@@ -167,41 +172,39 @@ export async function generateAllDownloadUrls(
     return { urls: null, error: "Access denied" };
   }
 
-  const urls: Array<{ file_id: string; filename: string; url: string }> = [];
+  // Sign all URLs in parallel (N sequential storage round-trips → 1 batch)
+  const candidates = delivery.files.filter(
+    (f) => !f.expires_at || new Date(f.expires_at) > new Date()
+  );
 
-  for (const file of delivery.files) {
-    if (file.expires_at && new Date(file.expires_at) < new Date()) {
-      continue; // Skip expired files
-    }
+  const results = await Promise.all(
+    candidates.map(async (file) => {
+      try {
+        const { download_url } = await supabaseStorage.generateDownloadUrl(
+          file.storage_key,
+          { expires_in: SIGNED_URL_EXPIRY_SECONDS }
+        );
+        return { file_id: file.id, filename: file.original_filename, url: download_url };
+      } catch {
+        return null; // Skip files that fail to generate URLs
+      }
+    })
+  );
 
-    try {
-      const { download_url } = await supabaseStorage.generateDownloadUrl(
-        file.storage_key,
-        { expires_in: SIGNED_URL_EXPIRY_SECONDS }
-      );
-
-      urls.push({
-        file_id: file.id,
-        filename: file.original_filename,
-        url: download_url,
-      });
-    } catch {
-      // Skip files that fail to generate URLs
-    }
-  }
+  const urls: Array<{ file_id: string; filename: string; url: string }> = results.filter(
+    (u): u is { file_id: string; filename: string; url: string } => u !== null
+  );
 
   if (urls.length === 0) {
     return { urls: null, error: "No downloadable files available" };
   }
 
-  // Increment download count
+  // Atomic increment — SQL-side, guarded by max_downloads (replaces the
+  // read-modify-write pattern that loses counts under concurrent downloads)
   const admin = createAdminClient();
-  await admin
-    .from("deliveries")
-    .update({
-      download_count: delivery.download_count + 1,
-    })
-    .eq("id", delivery.id);
+  await admin.rpc("increment_delivery_downloads", {
+    p_delivery_id: delivery.id,
+  });
 
   await logAuditEvent("download_requested", "delivery", delivery.id, {
     file_count: urls.length,

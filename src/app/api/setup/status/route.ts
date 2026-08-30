@@ -16,18 +16,21 @@ export async function GET() {
     'audit_logs',
   ];
   
-  const status: Record<string, boolean> = {};
-  
-  for (const table of tables) {
-    try {
-      const { error } = await supabase
-        .from(table)
-        .select('*', { count: 'exact', head: true });
-      status[table] = !error;
-    } catch {
-      status[table] = false;
-    }
-  }
+  // Check all tables in parallel (was 9 sequential round-trips)
+  const entries = await Promise.all(
+    tables.map(async (table): Promise<readonly [string, boolean]> => {
+      try {
+        const { error } = await supabase
+          .from(table)
+          .select('*', { count: 'exact', head: true });
+        return [table, !error] as const;
+      } catch {
+        return [table, false] as const;
+      }
+    })
+  );
+
+  const status: Record<string, boolean> = Object.fromEntries(entries);
   
   const allExist = Object.values(status).every(Boolean);
   

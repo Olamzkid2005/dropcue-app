@@ -261,19 +261,21 @@ export async function deleteFile(fileId: string) {
 async function evaluateProductStatus(productId: string) {
   const admin = createAdminClient();
 
-  const { data: product } = await admin
-    .from("products")
-    .select("price_amount, status")
-    .eq("id", productId)
-    .single();
+  // Product + uploaded-file count in parallel (was 2 sequential round-trips)
+  const [{ data: product }, { count }] = await Promise.all([
+    admin
+      .from("products")
+      .select("price_amount, status")
+      .eq("id", productId)
+      .single(),
+    admin
+      .from("files")
+      .select("*", { count: "exact", head: true })
+      .eq("product_id", productId)
+      .eq("status", "uploaded"),
+  ]);
 
   if (!product) return;
-
-  const { count } = await admin
-    .from("files")
-    .select("*", { count: "exact", head: true })
-    .eq("product_id", productId)
-    .eq("status", "uploaded");
 
   const hasFiles = (count ?? 0) > 0;
   const hasValidPrice = product.price_amount > 0;

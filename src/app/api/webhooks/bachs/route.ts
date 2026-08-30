@@ -33,25 +33,29 @@ export async function POST(request: NextRequest) {
 
     const admin = createAdminClient();
 
-    // Check idempotency — has this event been processed?
-    const { data: existingEvent } = await admin
-      .from("payment_events")
-      .select("id")
-      .eq("provider", "bachs")
-      .eq("provider_event_id", event.provider_event_id)
-      .single();
+    /* Idempotency check + order lookup are independent — run in parallel
+       to halve webhook latency. */
+    const [eventCheck, orderLookup] = await Promise.all([
+      admin
+        .from("payment_events")
+        .select("id")
+        .eq("provider", "bachs")
+        .eq("provider_event_id", event.provider_event_id)
+        .single(),
+      admin
+        .from("orders")
+        .select("id, status, amount, currency")
+        .or(`id.eq.${event.payment_reference},provider_session_id.eq.${event.payment_reference}`)
+        .single(),
+    ]);
 
-    if (existingEvent) {
+    if (eventCheck.data) {
       // Already processed
       return Response.json({ received: true });
     }
 
     // Find order by provider_session_id (which we set as the Bachs checkout_id)
-    const { data: order } = await admin
-      .from("orders")
-      .select("id, status, amount, currency")
-      .or(`id.eq.${event.payment_reference},provider_session_id.eq.${event.payment_reference}`)
-      .single();
+    const order = orderLookup.data;
 
     if (!order) {
       console.error("Order not found for payment reference:", event.payment_reference);

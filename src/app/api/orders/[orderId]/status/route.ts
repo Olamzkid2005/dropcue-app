@@ -32,9 +32,12 @@ export async function GET(
 
     const admin = createAdminClient();
 
+    /* Single round-trip: order + delivery token + product name via embeds.
+       This endpoint is polled by the payment success page — every saved
+       round-trip multiplies across polls. */
     const { data: order } = await admin
       .from("orders")
-      .select("id, status, product_id")
+      .select("id, status, deliveries(delivery_token), products(name)")
       .eq("id", orderId)
       .single();
 
@@ -42,33 +45,16 @@ export async function GET(
       return Response.json({ status: "failed", error: "Order not found" }, { status: 404 });
     }
 
-    let deliveryToken: string | null = null;
-    let productName: string | null = null;
-
-    if (order.status === "paid") {
-      // Get delivery token
-      const { data: delivery } = await admin
-        .from("deliveries")
-        .select("delivery_token")
-        .eq("order_id", orderId)
-        .single();
-
-      deliveryToken = delivery?.delivery_token ?? null;
-
-      // Get product name
-      const { data: product } = await admin
-        .from("products")
-        .select("name")
-        .eq("id", order.product_id)
-        .single();
-
-      productName = product?.name ?? null;
-    }
+    const deliveryToken =
+      (order as { deliveries?: Array<{ delivery_token: string } | null> })
+        .deliveries?.[0]?.delivery_token ?? null;
+    const productName =
+      (order as unknown as { products?: { name: string } | null }).products?.name ?? null;
 
     return Response.json({
       status: order.status,
-      delivery_token: deliveryToken,
-      product_name: productName,
+      delivery_token: order.status === "paid" ? deliveryToken : null,
+      product_name: order.status === "paid" ? productName : null,
     });
   } catch (error) {
     return handleApiError(error);

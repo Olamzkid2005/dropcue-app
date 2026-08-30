@@ -16,7 +16,23 @@ export async function middleware(request: NextRequest) {
     !supabaseUrl.includes("placeholder") &&
     !supabaseKey.includes("placeholder");
 
-  if (isSupabaseConfigured) {
+  const pathname = request.nextUrl.pathname;
+
+  const isProtectedAppRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/(creator)") ||
+    pathname.startsWith("/products") ||
+    pathname.startsWith("/orders");
+
+  const isAuthPage =
+    pathname.startsWith("/auth") &&
+    !pathname.startsWith("/auth/reset-password") &&
+    !pathname.startsWith("/auth/callback");
+
+  /* Only pay the Supabase auth round-trip on routes that actually need it.
+     Public pages — marketing, /p/*, /download/*, /api/* — skip it entirely,
+     which removes one auth API call from every anonymous pageview. */
+  if (isSupabaseConfigured && (isProtectedAppRoute || isAuthPage)) {
     try {
       const supabase = createServerClient(supabaseUrl, supabaseKey, {
         cookies: {
@@ -49,35 +65,22 @@ export async function middleware(request: NextRequest) {
       } = await supabase.auth.getUser();
 
       // Protect app routes — redirect to login if not authenticated
-      if (
-        request.nextUrl.pathname.startsWith("/dashboard") ||
-        request.nextUrl.pathname.startsWith("/(creator)") ||
-        request.nextUrl.pathname.startsWith("/products") ||
-        request.nextUrl.pathname.startsWith("/orders")
-      ) {
-        if (!user) {
-          const url = request.nextUrl.clone();
-          url.pathname = "/auth/login";
-          // Preserve the intended destination so we can redirect back after login
-          url.searchParams.set("next", request.nextUrl.pathname);
-          return NextResponse.redirect(url);
-        }
+      if (isProtectedAppRoute && !user) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/auth/login";
+        // Preserve the intended destination so we can redirect back after login
+        url.searchParams.set("next", pathname);
+        return NextResponse.redirect(url);
       }
 
       // Redirect logged-in users away from auth pages
       // But allow /auth/reset-password (from email link) and /auth/callback
-      if (
-        request.nextUrl.pathname.startsWith("/auth") &&
-        !request.nextUrl.pathname.startsWith("/auth/reset-password") &&
-        !request.nextUrl.pathname.startsWith("/auth/callback")
-      ) {
-        if (user) {
-          const url = request.nextUrl.clone();
-          // Send to the intended destination if provided, otherwise dashboard
-          const next = request.nextUrl.searchParams.get("next");
-          url.pathname = next || "/dashboard";
-          return NextResponse.redirect(url);
-        }
+      if (isAuthPage && user) {
+        const url = request.nextUrl.clone();
+        // Send to the intended destination if provided, otherwise dashboard
+        const next = request.nextUrl.searchParams.get("next");
+        url.pathname = next || "/dashboard";
+        return NextResponse.redirect(url);
       }
     } catch {
       // Supabase client creation failed — proceed without auth

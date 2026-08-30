@@ -1,10 +1,9 @@
 @import "tailwindcss";
 
-/* Material Symbols */
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-
-/* Google Fonts - Geist & Inter */
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap");
+/* Fonts: Geist & Inter come from next/font (layout.tsx — self-hosted, no
+   external CSS round-trip). Material Symbols loads via the <link> in
+   layout.tsx. Do not re-import webfonts here — @import serializes and
+   blocks CSS parsing. */
 
 @custom-variant dark (&:is(.dark *));
 

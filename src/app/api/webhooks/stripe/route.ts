@@ -28,24 +28,28 @@ export async function POST(request: NextRequest) {
 
     const admin = createAdminClient();
 
-    // Check idempotency
-    const { data: existingEvent } = await admin
-      .from("payment_events")
-      .select("id")
-      .eq("provider", "stripe")
-      .eq("provider_event_id", event.provider_event_id)
-      .single();
+    /* Idempotency check + order lookup are independent — run in parallel
+       to halve webhook latency. */
+    const [eventCheck, orderLookup] = await Promise.all([
+      admin
+        .from("payment_events")
+        .select("id")
+        .eq("provider", "stripe")
+        .eq("provider_event_id", event.provider_event_id)
+        .single(),
+      admin
+        .from("orders")
+        .select("id, status, amount, currency")
+        .eq("provider_session_id", event.payment_reference)
+        .single(),
+    ]);
 
-    if (existingEvent) {
+    if (eventCheck.data) {
       return Response.json({ received: true });
     }
 
     // Find order by provider_session_id
-    const { data: order } = await admin
-      .from("orders")
-      .select("id, status, amount, currency")
-      .eq("provider_session_id", event.payment_reference)
-      .single();
+    const order = orderLookup.data;
 
     if (!order) {
       console.error("Order not found for session:", event.payment_reference);
