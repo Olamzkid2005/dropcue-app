@@ -256,16 +256,12 @@ export default function LoginPage() {
                     />
                     <span className="text-[14px] text-muted">Remember me</span>
                   </label>
-                  <button
-                    type="button"
+                  <Link
+                    href="/auth/forgot-password"
                     className="text-[14px] text-accent hover:underline"
-                    onClick={() => {
-                      // TODO: Add forgot password flow
-                      setError("Password reset coming soon");
-                    }}
                   >
                     Forgot password?
-                  </button>
+                  </Link>
                 </div>
               )}
 

@@ -4,6 +4,13 @@ import { useState, useCallback } from "react";
 import { submitFeedback } from "@/modules/feedback/server/actions";
 import { FEEDBACK_CATEGORIES } from "@/modules/feedback/types";
 
+const CATEGORY_ICONS: Record<string, string> = {
+  broken: "fa-solid fa-bug",
+  confusing: "fa-solid fa-circle-question",
+  feature_request: "fa-solid fa-lightbulb",
+  general: "fa-solid fa-comment",
+};
+
 interface FeedbackButtonProps {
   pageUrl: string;
   productId?: string;
@@ -22,6 +29,19 @@ export function FeedbackButton({
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const handleClose = useCallback(() => {
+    if (submitting) return;
+    setIsOpen(false);
+    // Reset after animation
+    setTimeout(() => {
+      setSubmitted(false);
+      setCategory("");
+      setMessage("");
+      setEmail("");
+      setError("");
+    }, 200);
+  }, [submitting]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -47,13 +67,7 @@ export function FeedbackButton({
 
         if (result.success) {
           setSubmitted(true);
-          setTimeout(() => {
-            setIsOpen(false);
-            setSubmitted(false);
-            setCategory("");
-            setMessage("");
-            setEmail("");
-          }, 2000);
+          setTimeout(handleClose, 2200);
         } else {
           setError(result.error || "Failed to submit feedback");
         }
@@ -63,7 +77,7 @@ export function FeedbackButton({
         setSubmitting(false);
       }
     },
-    [category, message, email, pageUrl, productId, orderId]
+    [category, message, email, pageUrl, productId, orderId, handleClose]
   );
 
   return (
@@ -71,89 +85,85 @@ export function FeedbackButton({
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface-studio border border-outline-variant/60 text-on-surface text-[13px] font-medium px-4 py-2.5 rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.1)] hover:border-accent-indigo/40 transition-all duration-200 active:scale-95 cursor-pointer backdrop-blur-sm"
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface border border-hairline text-ink text-[13px] font-medium px-4 py-2.5 rounded-full shadow-soft hover:shadow-jumbo hover:border-accent/30 transition-all duration-200 active:scale-95 cursor-pointer"
         aria-label="Send feedback"
       >
-        <span
-          className="material-symbols-outlined text-[18px] text-accent-indigo"
-          style={{ fontVariationSettings: "'FILL' 0" }}
-        >
-          feedback
-        </span>
+        <i className="fa-solid fa-comment-dots text-accent text-[14px]" />
         <span className="hidden sm:inline">Feedback</span>
       </button>
 
-      {/* Modal Overlay */}
+      {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-            onClick={() => !submitting && setIsOpen(false)}
+            className="absolute inset-0 bg-ink/20 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={handleClose}
           />
 
-          {/* Modal */}
-          <div className="relative w-full max-w-md bg-surface-studio border border-outline-variant rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] overflow-hidden">
+          {/* Modal Card */}
+          <div className="relative w-full max-w-[440px] bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden animate-in zoom-in-95 fade-in duration-200">
             {submitted ? (
               /* Success State */
-              <div className="flex flex-col items-center justify-center p-section-gap text-center">
-                <div className="w-16 h-16 bg-success-green/10 rounded-full flex items-center justify-center mb-stack-md">
-                  <span className="material-symbols-outlined text-success-green text-3xl">
-                    check_circle
-                  </span>
+              <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+                <div className="w-16 h-16 bg-[#10B981]/10 rounded-full flex items-center justify-center mb-5">
+                  <i className="fa-solid fa-check text-2xl text-[#10B981]" />
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-stack-sm">
+                <h3 className="text-[20px] font-semibold text-ink mb-2">
                   Thank you!
                 </h3>
-                <p className="font-body-md text-body-md text-secondary">
-                  Your feedback has been received.
+                <p className="text-[14px] text-muted leading-relaxed">
+                  Your feedback has been received. We appreciate you helping us
+                  improve Dropcue.
                 </p>
               </div>
             ) : (
               /* Form */
               <form onSubmit={handleSubmit}>
                 {/* Header */}
-                <div className="flex items-center justify-between p-gutter border-b border-outline-variant">
-                  <h3 className="font-section-header text-section-header text-on-surface">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-hairline">
+                  <h3 className="text-[16px] font-semibold text-ink">
                     Send feedback
                   </h3>
                   <button
                     type="button"
-                    onClick={() => !submitting && setIsOpen(false)}
-                    className="text-secondary hover:text-on-surface p-1 rounded-md hover:bg-surface-container-low transition-colors cursor-pointer"
+                    onClick={handleClose}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition-colors cursor-pointer"
                     disabled={submitting}
                   >
-                    <span className="material-symbols-outlined">close</span>
+                    <i className="fa-solid fa-xmark text-[16px]" />
                   </button>
                 </div>
 
-                <div className="p-gutter flex flex-col gap-stack-md">
+                <div className="px-6 py-5 space-y-5">
                   {/* Category Selection */}
-                  <div className="space-y-2">
-                    <label className="font-label-sm text-label-sm text-on-surface">
+                  <div className="space-y-2.5">
+                    <label className="text-[13px] font-medium text-ink block">
                       What&apos;s this about?
                     </label>
                     <div className="grid grid-cols-2 gap-2">
-                      {FEEDBACK_CATEGORIES.map((cat) => (
-                        <button
-                          key={cat.value}
-                          type="button"
-                          onClick={() => setCategory(cat.value)}
-                          className={`flex items-center gap-2 p-2.5 rounded-lg border text-left font-label-sm text-label-sm transition-all duration-150 cursor-pointer ${
-                            category === cat.value
-                              ? "border-accent-indigo bg-accent-indigo/5 text-accent-indigo"
-                              : "border-outline-variant bg-surface-studio text-on-surface hover:border-secondary hover:bg-surface-container-low"
-                          }`}
-                        >
-                          <span
-                            className="material-symbols-outlined text-lg"
-                            style={{ fontVariationSettings: "'FILL' 0" }}
+                      {FEEDBACK_CATEGORIES.map((cat) => {
+                        const isSelected = category === cat.value;
+                        return (
+                          <button
+                            key={cat.value}
+                            type="button"
+                            onClick={() => setCategory(cat.value)}
+                            className={`flex items-center gap-2.5 p-3 rounded-xl border text-left text-[13px] font-medium transition-all duration-150 cursor-pointer ${
+                              isSelected
+                                ? "border-accent bg-accent/5 text-accent ring-1 ring-accent/20"
+                                : "border-hairline bg-surface text-ink hover:border-muted hover:bg-gray-50/50"
+                            }`}
                           >
-                            {cat.icon}
-                          </span>
-                          {cat.label}
-                        </button>
-                      ))}
+                            <i
+                              className={`${CATEGORY_ICONS[cat.value] ?? "fa-solid fa-circle"} text-[14px] ${
+                                isSelected ? "text-accent" : "text-muted"
+                              }`}
+                            />
+                            {cat.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -161,10 +171,10 @@ export function FeedbackButton({
                   <div className="space-y-2">
                     <label
                       htmlFor="feedback-message"
-                      className="font-label-sm text-label-sm text-on-surface flex items-center gap-1"
+                      className="text-[13px] font-medium text-ink block"
                     >
                       Tell us more{" "}
-                      <span className="text-error-red">*</span>
+                      <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       id="feedback-message"
@@ -173,7 +183,7 @@ export function FeedbackButton({
                       placeholder="Describe the issue or share your suggestion..."
                       rows={4}
                       required
-                      className="input-base font-body-md text-body-md resize-y min-h-[80px]"
+                      className="w-full px-4 py-3 rounded-xl border border-hairline bg-surface text-ink text-[14px] placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-y min-h-[100px] transition-colors"
                     />
                   </div>
 
@@ -181,12 +191,10 @@ export function FeedbackButton({
                   <div className="space-y-2">
                     <label
                       htmlFor="feedback-email"
-                      className="font-label-sm text-label-sm text-on-surface"
+                      className="text-[13px] font-medium text-ink block"
                     >
                       Email{" "}
-                      <span className="text-secondary font-normal">
-                        (optional)
-                      </span>
+                      <span className="text-muted font-normal">(optional)</span>
                     </label>
                     <input
                       id="feedback-email"
@@ -194,46 +202,42 @@ export function FeedbackButton({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="For follow-up only"
-                      className="input-base font-body-md text-body-md"
+                      className="w-full h-11 px-4 rounded-xl border border-hairline bg-surface text-ink text-[14px] placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-colors"
                     />
                   </div>
 
                   {/* Error */}
                   {error && (
-                    <p className="font-metadata text-metadata text-error-red">
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-[13px] text-red-600">
+                      <i className="fa-solid fa-circle-exclamation text-[14px] shrink-0" />
                       {error}
-                    </p>
+                    </div>
                   )}
                 </div>
 
                 {/* Footer */}
-                <div className="p-gutter border-t border-outline-variant flex justify-end gap-stack-sm">
+                <div className="px-6 py-4 border-t border-hairline flex justify-end gap-3">
                   <button
                     type="button"
-                    onClick={() => setIsOpen(false)}
-                    className="btn-secondary font-label-sm text-label-sm"
+                    onClick={handleClose}
+                    className="h-10 px-5 rounded-xl border border-hairline bg-surface text-ink text-[13px] font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                     disabled={submitting}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-primary font-label-sm text-label-sm flex items-center gap-2"
+                    className="h-10 px-5 rounded-xl bg-accent text-white text-[13px] font-medium hover:bg-[#3730a3] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
                     disabled={!category || !message.trim() || submitting}
                   >
                     {submitting ? (
                       <>
-                        <span className="spinner-border w-4 h-4" />
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Sending...
                       </>
                     ) : (
                       <>
-                        <span
-                          className="material-symbols-outlined text-sm"
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          send
-                        </span>
+                        <i className="fa-solid fa-paper-plane text-[12px]" />
                         Send feedback
                       </>
                     )}

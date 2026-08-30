@@ -65,7 +65,12 @@ export async function middleware(request: NextRequest) {
       }
 
       // Redirect logged-in users away from auth pages
-      if (request.nextUrl.pathname.startsWith("/auth")) {
+      // But allow /auth/reset-password (from email link) and /auth/callback
+      if (
+        request.nextUrl.pathname.startsWith("/auth") &&
+        !request.nextUrl.pathname.startsWith("/auth/reset-password") &&
+        !request.nextUrl.pathname.startsWith("/auth/callback")
+      ) {
         if (user) {
           const url = request.nextUrl.clone();
           // Send to the intended destination if provided, otherwise dashboard
