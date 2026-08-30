@@ -5,6 +5,10 @@
 import puppeteer, { Browser, Page } from "puppeteer-core";
 
 const BASE_URL = "http://127.0.0.1:3000";
+
+async function waitForNavigationResponse(page: Page, url: string, waitUntil: "domcontentloaded" | "networkidle2" = "domcontentloaded") {
+  return page.goto(url, { waitUntil, timeout: 30000 });
+}
 const CHROME_PATH =
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
@@ -176,8 +180,8 @@ async function run() {
 
     // ─── 9. NONEXISTENT PRODUCT ───
     console.log("\n=== 9. NONEXISTENT PRODUCT ===");
-    const resp404 = await page.goto(`${BASE_URL}/p/does-not-exist`, { waitUntil: "networkidle2", timeout: 30000 });
-    const status404 = resp404?.status() ?? 0;
+    const resp404 = await fetch(`${BASE_URL}/p/does-not-exist`);
+    const status404 = resp404.status;
     status404 === 404
       ? log("Nonexistent product returns 404", "PASS")
       : log("Nonexistent product returns 404", "FAIL", `Status: ${status404}`);
@@ -186,14 +190,12 @@ async function run() {
 
     // ─── 10. CHECKOUT API ───
     console.log("\n=== 10. CHECKOUT API ===");
-    const checkoutResp = await page.evaluate(async () => {
-      const res = await fetch("/api/checkout/00000000-0000-0000-0000-000000000000", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buyer_email: "test@example.com", payment_provider: "bachs" }),
-      });
-      return { status: res.status, body: await res.json() };
+    const checkoutHttpResp = await fetch(`${BASE_URL}/api/checkout/00000000-0000-0000-0000-000000000000`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ buyer_email: "test@example.com", payment_provider: "bachs" }),
     });
+    const checkoutResp = { status: checkoutHttpResp.status, body: await checkoutHttpResp.json() };
     checkoutResp.status === 404 || checkoutResp.status === 400
       ? log("Checkout API returns error for fake product", "PASS", `Status: ${checkoutResp.status}`)
       : log("Checkout API returns error for fake product", "FAIL", `Status: ${checkoutResp.status}`);

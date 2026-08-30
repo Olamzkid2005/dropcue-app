@@ -27,6 +27,7 @@ export default async function PublicProductPage({ params }: Props) {
 
   if (!product) {
     notFound();
+    return null;
   }
 
   const displayPrice = formatDisplayPrice(createMoney(product.price_amount));
