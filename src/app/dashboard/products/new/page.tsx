@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProduct } from "@/modules/products/server/actions";
+import { amountInWords, formatNairaInput } from "@/lib/money/types";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function NewProductPage() {
     const result = await createProduct({
       name: form.name,
       description: form.description || undefined,
-      price_amount: Number(form.price_amount),
+      price_amount: Number(form.price_amount.replace(/,/g, "")),
     });
 
     if (result.success && result.product) {
@@ -106,17 +107,20 @@ export default function NewProductPage() {
                 </span>
                 <input
                   id="price"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   required
-                  min={100}
-                  max={10000000}
-                  step={100}
                   value={form.price_amount}
-                  onChange={(e) => setForm({ ...form, price_amount: e.target.value })}
+                  onChange={(e) => setForm({ ...form, price_amount: formatNairaInput(e.target.value) })}
                   placeholder="15000"
                   className="w-full h-11 pl-8 pr-4 rounded-lg border border-hairline bg-surface text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-colors"
                 />
               </div>
+              {amountInWords(form.price_amount) && (
+                <p className="text-sm text-ink/70">
+                  {amountInWords(form.price_amount).replace(/^./, (letter) => letter.toUpperCase())}
+                </p>
+              )}
               <p className="text-xs text-muted">
                 Minimum ₦100. You receive payment minus provider fees.
               </p>
