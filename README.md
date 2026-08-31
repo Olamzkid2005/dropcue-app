@@ -7,11 +7,11 @@ Sell and deliver digital products securely. Creators upload files, set a price, 
 | Layer | Technology |
 |-------|-----------|
 | Frontend + Backend | Next.js 15 (App Router) + TypeScript |
-| UI | Tailwind CSS + shadcn/ui |
+| UI | Tailwind CSS |
 | Database | Supabase PostgreSQL (with RLS) |
 | File Storage | Supabase Storage (private, signed URLs) |
 | Auth | Supabase Auth (magic link + Google/Apple OAuth) |
-| Payments | Bachs.io + Stripe |
+| Payments | Bachs.io (primary) + Stripe (optional) |
 | Email | Resend |
 | Testing | Puppeteer |
 
@@ -34,7 +34,7 @@ npm install
    - `service_role` key (keep this secret)
 3. Go to **SQL Editor** and run the migration:
    ```sql
-   -- Paste contents of supabase/migrations/001_initial_schema.sql
+   -- Paste the ordered contents of supabase/migrations/*.sql
    ```
 4. Go to **Storage** and create a bucket named `products` (private)
 
@@ -184,28 +184,20 @@ npm run lint     # Run ESLint
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase service role key (server-only) |
-| `SUPABASE_JWT_SECRET` | ✅ | Supabase JWT secret |
+| `SUPABASE_JWT_SECRET` | ❌ | Not used by the current app |
 | `NEXT_PUBLIC_SITE_URL` | ✅ | App URL for auth redirects |
 | `BACHS_SECRET_KEY` | ✅ | Bachs.io API key (`sk_sandbox_...` or `sk_live_...`) |
 | `BACHS_WEBHOOK_SECRET` | ✅ | Bachs.io webhook signing secret |
 | `STRIPE_SECRET_KEY` | ❌ | Stripe secret key (optional provider) |
 | `STRIPE_WEBHOOK_SECRET` | ❌ | Stripe webhook secret |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | ❌ | Stripe publishable key |
-| `RESEND_API_KEY` | ✅ | Resend API key for emails |
+| `RESEND_API_KEY` | ❌ | Resend API key for purchase emails |
 | `NEXT_PUBLIC_APP_URL` | ✅ | App URL for email links |
 | `ADMIN_EMAIL` | ❌ | Receives feedback notification emails |
 
 ## Testing
 
-```bash
-# Run the comprehensive E2E test suite
-npx tsx tests/phase9-comprehensive.test.ts
-
-# Run auth flow tests
-npx tsx tests/auth-flow.test.ts
-```
-
-Requires the dev server to be running on port 3000.
+The repository contains browser smoke and staging-only payment/load tests. They require a running dev server and a browser executable configured for the current machine. Run only the test that matches the change being verified.
 
 ## Deployment
 

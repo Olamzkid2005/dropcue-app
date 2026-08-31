@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:api": "node --experimental-strip-types tests/api.test.ts",
+    "test:auth": "node --experimental-strip-types tests/auth-flow.test.ts",
+    "test:e2e": "node --experimental-strip-types tests/e2e.test.ts",
+    "test:full-flow": "node --experimental-strip-types tests/full-flow.test.ts",
+    "test:phase9": "node --experimental-strip-types tests/phase9-comprehensive.test.ts",
+    "test:payment-chaos": "node --experimental-strip-types tests/payment-chaos.test.ts",
+    "test:load": "node --experimental-strip-types tests/load-test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

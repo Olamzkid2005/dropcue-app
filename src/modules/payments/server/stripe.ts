@@ -3,7 +3,6 @@ import type {
   PaymentProvider,
   Money,
   WebhookVerificationResult,
-  VerifiedTransaction,
   PaymentEvent,
 } from "../types";
 
@@ -16,9 +15,6 @@ function getStripeClient(): Stripe {
 export class StripeProvider implements PaymentProvider {
   name = "stripe" as const;
 
-  /**
-   * Stripe uses smallest currency unit (kobo) - pass through as-is
-   */
   formatAmount(money: Money): number {
     return money.amount;
   }
@@ -30,19 +26,14 @@ export class StripeProvider implements PaymentProvider {
     buyer_email?: string;
     success_url: string;
     cancel_url: string;
-    webhook_url: string;
   }): Promise<{ session_id: string; checkout_url: string }> {
-    const stripe = getStripeClient();
-
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient().checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
             currency: params.amount.currency.toLowerCase(),
-            product_data: {
-              name: params.product_name,
-            },
+            product_data: { name: params.product_name },
             unit_amount: this.formatAmount(params.amount),
           },
           quantity: 1,
@@ -51,127 +42,52 @@ export class StripeProvider implements PaymentProvider {
       mode: "payment",
       success_url: params.success_url,
       cancel_url: params.cancel_url,
-      metadata: {
-        order_id: params.orderId,
-      },
+      metadata: { order_id: params.orderId },
       ...(params.buyer_email && { customer_email: params.buyer_email }),
     });
 
-    return {
-      session_id: session.id,
-      checkout_url: session.url ?? "",
-    };
+    return { session_id: session.id, checkout_url: session.url ?? "" };
   }
 
   async verifyWebhook(
-    payload: unknown,
+    rawBody: string,
     headers: Headers
   ): Promise<WebhookVerificationResult> {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      return { valid: false, error: "STRIPE_WEBHOOK_SECRET not configured" };
-    }
-
     const signature = headers.get("stripe-signature");
-    if (!signature) {
-      return { valid: false, error: "Missing webhook signature" };
+    if (!webhookSecret || !signature) {
+      return { valid: false, error: "Stripe webhook is not configured" };
     }
 
     try {
-      const stripe = getStripeClient();
-      const event = stripe.webhooks.constructEvent(
-        payload as string | Buffer,
+      const event = getStripeClient().webhooks.constructEvent(
+        rawBody,
         signature,
         webhookSecret
       );
 
-      if (event.type === "checkout.session.completed") {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const paymentEvent: PaymentEvent = {
-          type: "paid",
-          provider_event_id: event.id,
-          payment_reference: session.payment_intent as string ?? session.id,
-          amount: {
-            amount: session.amount_total ?? 0,
-            currency: (session.currency ?? "ngn").toUpperCase(),
-          },
-        };
-        return { valid: true, event: paymentEvent };
-      }
+      if (event.type !== "checkout.session.completed") return { valid: true };
 
-      // Other event types - still valid, just not a payment success
-      return { valid: true };
-    } catch (err) {
-      return {
-        valid: false,
-        error: err instanceof Error ? err.message : "Verification failed",
-      };
-    }
-  }
-
-  async verifyTransaction(
-    paymentReference: string
-  ): Promise<VerifiedTransaction> {
-    const stripe = getStripeClient();
-
-    // Try as checkout session first, then as payment intent
-    try {
-      const session = await stripe.checkout.sessions.retrieve(paymentReference);
-      return {
-        status:
-          session.payment_status === "paid" ? "success" : "pending",
+      const session = event.data.object as Stripe.Checkout.Session;
+      const paymentEvent: PaymentEvent = {
+        type: "paid",
+        provider_event_id: event.id,
+        payment_reference:
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : session.id,
+        provider_session_id: session.id,
         amount: {
           amount: session.amount_total ?? 0,
           currency: (session.currency ?? "ngn").toUpperCase(),
         },
-        currency: (session.currency ?? "ngn").toUpperCase(),
-        reference: session.id,
       };
-    } catch {
-      // Not a session ID, try as payment intent
-      const intent = await stripe.paymentIntents.retrieve(paymentReference);
+      return { valid: true, event: paymentEvent };
+    } catch (error) {
       return {
-        status:
-          intent.status === "succeeded" ? "success" : intent.status === "failed" ? "failed" : "pending",
-        amount: {
-          amount: intent.amount,
-          currency: intent.currency.toUpperCase(),
-        },
-        currency: intent.currency.toUpperCase(),
-        reference: intent.id,
+        valid: false,
+        error: error instanceof Error ? error.message : "Verification failed",
       };
     }
-  }
-
-  parseWebhook(payload: unknown): PaymentEvent {
-    const event = payload as {
-      id?: string;
-      type?: string;
-      data?: {
-        object?: {
-          id?: string;
-          amount_total?: number;
-          currency?: string;
-          payment_intent?: string;
-          metadata?: { order_id?: string };
-          payment_status?: string;
-        };
-      };
-    };
-
-    const session = event.data?.object;
-    const eventType =
-      event.type === "checkout.session.completed" ? "paid" : "failed";
-
-    return {
-      type: eventType,
-      provider_event_id: event.id ?? "",
-      payment_reference:
-        (session?.payment_intent as string) ?? session?.id ?? "",
-      amount: {
-        amount: session?.amount_total ?? 0,
-        currency: (session?.currency ?? "ngn").toUpperCase(),
-      },
-    };
   }
 }

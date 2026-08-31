@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Run from the script directory so relative paths work from any current directory
+cd "$(dirname "$0")"
+
 # ─────────────────────────────────────────────
 #  Dropcue — Development Start Script
 #  Starts all app services for local development
@@ -16,6 +19,26 @@ BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 # Helpers
+port_pids() {
+  # Return PIDs listening on PORT using the available platform tool.
+  if command -v lsof &>/dev/null; then
+    lsof -ti :"$PORT" 2>/dev/null || true
+  elif command -v netstat &>/dev/null; then
+    netstat -ano 2>/dev/null \
+      | awk -v port=":$PORT" '$1 == "TCP" && $2 ~ port "$" && $4 == "LISTENING" { print $5 }' \
+      | sort -u
+  fi
+}
+
+kill_port_pids() {
+  for pid in $(port_pids); do
+    if command -v taskkill &>/dev/null; then
+      taskkill //F //PID "$pid" 2>/dev/null || true
+    else
+      kill -9 "$pid" 2>/dev/null || true
+    fi
+  done
+}
 log()    { echo -e "${BLUE}[dropcue]${NC} $*"; }
 ok()     { echo -e "${GREEN}  ✓${NC} $*"; }
 warn()   { echo -e "${YELLOW}  ⚠${NC} $*"; }
@@ -86,10 +109,14 @@ fi
 header "Port Check"
 
 PORT=3000
-if lsof -ti :"$PORT" &>/dev/null; then
+if [ -n "$(port_pids)" ]; then
   warn "Port ${PORT} is in use — killing existing process"
-  lsof -ti :"$PORT" | xargs kill -9 2>/dev/null || true
+  kill_port_pids
   sleep 1
+fi
+if [ -n "$(port_pids)" ]; then
+  fail "Port ${PORT} is still in use — stop it manually and retry"
+  exit 1
 fi
 ok "Port ${PORT} is free"
 
@@ -149,10 +176,17 @@ fi
 # ─────────────────────────────────────────────
 header "Starting Services"
 
+# A production build and a dev server share .next; clear a production cache
+# before starting dev so their compiled assets cannot be mixed.
+if [ -f ".next/BUILD_ID" ]; then
+  warn "Production build cache found — clearing .next for a clean dev start"
+  rm -rf .next
+fi
+
 log "Starting Next.js dev server on port ${PORT}..."
 
 # Start the server and capture PID
-cd /Users/mac/Documents/Dropcue-app
+
 npx next dev --port "$PORT" --hostname 0.0.0.0 &
 DEV_PID=$!
 
@@ -211,7 +245,7 @@ cleanup() {
     wait "$DEV_PID" 2>/dev/null || true
   fi
   # Also kill any orphaned processes on the port
-  lsof -ti :"$PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
+  kill_port_pids
   ok "All services stopped"
   echo ""
   exit 0

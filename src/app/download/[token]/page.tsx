@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -140,12 +141,12 @@ export default function DownloadPage() {
               The link may be incorrect, expired, or the product may have been
               removed by the creator.
             </p>
-            <a
+            <Link
               href="/"
               className="bg-accent-indigo text-white px-6 py-3 rounded-lg text-[14px] font-medium hover:opacity-90 transition-colors"
             >
               Return to home
-            </a>
+            </Link>
           </div>
         </div>
       </>

@@ -1,20 +1,28 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { NextResponse } from 'next/server';
+import { readFileSync, readdirSync } from "fs";
+import { join } from "path";
+import { NextResponse } from "next/server";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (process.env.NODE_ENV === "production") {
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   try {
-    const sqlPath = join(process.cwd(), 'supabase/migrations/001_initial_schema.sql');
-    const sql = readFileSync(sqlPath, 'utf8');
-    
+    const migrationsDir = join(process.cwd(), "supabase/migrations");
+    const sql = readdirSync(migrationsDir)
+      .filter((file) => file.endsWith(".sql"))
+      .sort()
+      .map((file) => readFileSync(join(migrationsDir, file), "utf8"))
+      .join("\n\n");
+
     return new NextResponse(sql, {
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
+        "Content-Type": "text/plain; charset=utf-8",
       },
     });
-  } catch (error) {
-    return new NextResponse('Error reading migration file', { status: 500 });
+  } catch {
+    return new NextResponse("Error reading migration files", { status: 500 });
   }
 }

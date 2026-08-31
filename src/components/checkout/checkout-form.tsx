@@ -23,7 +23,7 @@ export function CheckoutForm({ productId, productName }: CheckoutFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           buyer_email: email,
-          payment_provider: "korapay",
+          payment_provider: "bachs",
         }),
       });
 
@@ -37,7 +37,11 @@ export function CheckoutForm({ productId, productName }: CheckoutFormProps) {
 
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
+        return;
       }
+
+      setError("Payment provider did not return a checkout link");
+      setIsSubmitting(false);
     } catch {
       setError("Network error. Please try again.");
       setIsSubmitting(false);

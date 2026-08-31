@@ -2,6 +2,7 @@ import puppeteer, { Browser, Page } from "puppeteer-core";
 
 const BASE_URL = "http://127.0.0.1:3000";
 const CHROME_PATH =
+  process.env.PUPPETEER_EXECUTABLE_PATH ??
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 interface TestResult {
@@ -248,7 +249,7 @@ async function runTests() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           buyer_email: "test@example.com",
-          payment_provider: "korapay",
+          payment_provider: "bachs",
         }),
       });
       log(

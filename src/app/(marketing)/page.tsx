@@ -22,12 +22,11 @@ const howItWorksSteps = [
     title: "Share one link",
     desc: "Paste your link anywhere—socials, emails, or bio. Buyers check out in seconds.",
     icon: "fa-solid fa-link",
-  },
-  {
+  },  {
     num: "4",
-    title: "Get paid instantly",
-    desc: "Funds land in your account fast. Withdraw whenever you're ready.",
-    icon: "fa-solid fa-money-bill-wave",
+    title: "Track the sale",
+    desc: "Payment status and order details stay visible in your dashboard.",
+    icon: "fa-solid fa-receipt",
   },
 ];
 
@@ -49,16 +48,9 @@ const features = [
   },
   {
     icon: "fa-solid fa-credit-card",
-    title: "Get Paid",
-    desc: "Accept payments via Stripe. Track orders, revenue, and downloads from a single dashboard.",
+    title:      "Track Sales",
+    desc: "Accept payments through the configured provider and track orders from a single dashboard.",
   },
-];
-
-const tickerItems = [
-  'Producer sold "Neon Nights" — $45',
-  "Designer uploaded 3 templates",
-  "Photographer earned $128 today",
-  "New payout processed — $2,410",
 ];
 
 export default function MarketingHomePage() {
@@ -101,7 +93,7 @@ export default function MarketingHomePage() {
               </span>
               <span>
                 <i className="fa-solid fa-check mr-2 text-ink" />
-                Instant payouts
+                Track completed sales
               </span>
             </div>
           </div>
@@ -121,7 +113,7 @@ export default function MarketingHomePage() {
               How it works
             </h2>
             <p className="text-muted text-lg max-w-xl">
-              Four steps from upload to payout. Everything else is handled
+              Four steps from upload to order tracking. Everything else is handled
               automatically.
             </p>
           </div>
@@ -320,14 +312,13 @@ export default function MarketingHomePage() {
               />
             </div>
           </div>
-          <div className="space-y-8">
-            <h2 className="text-4xl font-semibold tracking-tight">
-              A storefront that sells while you sleep
+          <div className="space-y-8">            <h2 className="text-4xl font-semibold tracking-tight">
+              A storefront that delivers while you sleep
             </h2>
             <p className="text-muted text-lg leading-relaxed">
               Dropcue gives you a beautiful, mobile-ready checkout page in
-              seconds. Buyers pay, you get notified, and the file ships
-              automatically—no manual downloads, no back-and-forth.
+              seconds. Buyers pay, you get notified, and the files become
+              available through a secure download link.
             </p>
             <ul className="space-y-4">
               <li className="flex items-center gap-3">
@@ -336,11 +327,11 @@ export default function MarketingHomePage() {
               </li>
               <li className="flex items-center gap-3">
                 <i className="fa-solid fa-circle-check text-accent" />
-                <span>Built-in analytics and earnings tracker</span>
+                <span>Order tracking from one dashboard</span>
               </li>
               <li className="flex items-center gap-3">
                 <i className="fa-solid fa-circle-check text-accent" />
-                <span>Custom branding on your checkout page</span>
+                <span>Clean, mobile-ready checkout pages</span>
               </li>
             </ul>
           </div>
@@ -370,7 +361,7 @@ export default function MarketingHomePage() {
               Everything you need to sell
             </h2>
             <p className="text-muted text-lg max-w-xl">
-              A complete toolkit — from upload to payout, all in one place.
+              A complete toolkit — from upload to secure delivery, all in one place.
             </p>
           </div>
           <div className="grid lg:grid-cols-2 gap-8">
@@ -460,8 +451,8 @@ export default function MarketingHomePage() {
                   Protected for creators and buyers alike
                 </h3>
                 <p className="text-muted">
-                  Every transaction is backed by enterprise-grade security and
-                  monitored in real time.
+                  Payments are verified by the configured provider before files
+                  are released.
                 </p>
                 <div className="flex items-center justify-center gap-2 pt-2">
                   <span className="relative flex h-3 w-3">
@@ -469,7 +460,7 @@ export default function MarketingHomePage() {
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-accent" />
                   </span>
                   <span className="text-xs text-muted uppercase tracking-widest font-semibold">
-                    System Operational
+                    Payment flow protected
                   </span>
                 </div>
               </div>
@@ -484,19 +475,13 @@ export default function MarketingHomePage() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
               </span>
               <span className="text-xs uppercase tracking-widest font-semibold text-muted">
-                Live Platform Activity
+                How delivery works
               </span>
-            </div>
-            <div className="overflow-hidden h-12 flex items-center">
-              <div className="flex gap-12 animate-ticker whitespace-nowrap text-sm text-muted font-mono">
-                {tickerItems.map((item, i) => (
-                  <span key={i}>{item}</span>
-                ))}
-                {tickerItems.map((item, i) => (
-                  <span key={`dup-${i}`}>{item}</span>
-                ))}
+            </div>              <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-muted">
+                <span>Payment verified before delivery</span>
+                <span>Private storage by default</span>
+                <span>Expiring download links</span>
               </div>
-            </div>
           </div>
         </div>
       </section>
@@ -569,8 +554,7 @@ export default function MarketingHomePage() {
                   ))}
                 </div>
                 <p className="text-muted mb-8">
-                  Join thousands of creators who trust Dropcue to deliver their
-                  work and get paid.
+                Keep product and order details in one place as you sell.
                 </p>
                 <div className="flex -space-x-3">
                   {[...Array(4)].map((_, i) => (

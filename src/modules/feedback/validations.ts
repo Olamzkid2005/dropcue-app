@@ -11,7 +11,14 @@ export const submitFeedbackSchema = z.object({
     .email("Please enter a valid email address")
     .optional()
     .or(z.literal("")),
-  page_url: z.string().min(1, "Page URL is required").max(2048),
+  page_url: z
+    .string()
+    .min(1, "Page URL is required")
+    .max(2048)
+    .refine(
+      (value) => value.startsWith("/") && !value.startsWith("//") || /^https?:\/\//i.test(value),
+      "Page URL must be a relative path or an HTTP(S) URL"
+    ),
   product_id: z.string().uuid().optional(),
   order_id: z.string().uuid().optional(),
 });

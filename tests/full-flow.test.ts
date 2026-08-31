@@ -10,6 +10,7 @@ async function waitForNavigationResponse(page: Page, url: string, waitUntil: "do
   return page.goto(url, { waitUntil, timeout: 30000 });
 }
 const CHROME_PATH =
+  process.env.PUPPETEER_EXECUTABLE_PATH ??
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 interface TestResult {

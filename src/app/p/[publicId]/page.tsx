@@ -1,34 +1,49 @@
-import { notFound } from "next/navigation";
-import { getPublicProduct } from "@/modules/products/server/actions";
-import { formatDisplayPrice, createMoney } from "@/lib/money/types";
-import { MockCheckoutClient } from "./mock-checkout-client";
+import { notFound}
+ from "next/navigation";
+import { getPublicProduct}
+ from "@/modules/products/server/actions";
+import { formatDisplayPrice, createMoney}
+ from "@/lib/money/types";
+import { CheckoutForm}
+ from "@/components/checkout/checkout-form";
 
 interface Props {
-  params: Promise<{ publicId: string }>;
+  params: Promise<{ publicId: string}
+>;
 }
 
-export async function generateMetadata({ params }: Props) {
-  const { publicId } = await params;
-  const { product } = await getPublicProduct(publicId);
+export async function generateMetadata({ params}
+: Props) {
+  const { publicId}
+ = await params;
+  const { product}
+ = await getPublicProduct(publicId);
 
   if (!product) {
-    return { title: "Product Not Found" };
-  }
+    return { title: "Product Not Found"}
+;
+ }
+
 
   return {
     title: `${product.name} — Dropcue`,
     description: product.description ?? `Buy ${product.name} on Dropcue`,
-  };
+ }
+;
 }
 
-export default async function PublicProductPage({ params }: Props) {
-  const { publicId } = await params;
-  const { product } = await getPublicProduct(publicId);
+export default async function PublicProductPage({ params}
+: Props) {
+  const { publicId}
+ = await params;
+  const { product}
+ = await getPublicProduct(publicId);
 
   if (!product) {
     notFound();
     return null;
-  }
+ }
+
 
   const displayPrice = formatDisplayPrice(createMoney(product.price_amount));
 
@@ -76,29 +91,11 @@ export default async function PublicProductPage({ params }: Props) {
                 </div>
               </div>
 
-              {/* Audio Player Placeholder */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 shadow-sm">
-                <button className="w-12 h-12 rounded-full bg-[#4338CA] text-white flex items-center justify-center shrink-0 hover:bg-[#3730A3] transition-colors">
-                  <span className="material-symbols-outlined text-[24px]">
-                    play_arrow
-                  </span>
-                </button>
-                <div className="flex-grow flex items-center h-8 gap-[2px] opacity-70">
-                  {Array.from({ length: 40 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-1 rounded-full ${
-                        i < 13 ? "bg-[#4338CA]" : "bg-gray-200"
-                      }`}
-                      style={{
-                        height: `${Math.floor(seededRandom(i) * 80) + 20}%`,
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="text-[12px] text-[#6e6e73] shrink-0 w-12 text-right">
-                  0:00
+              <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm text-[14px] text-[#6e6e73]">
+                <span className="material-symbols-outlined text-[#4338CA] text-[20px]">
+                  lock
                 </span>
+                Files become available after payment is verified.
               </div>
             </div>
 
@@ -153,11 +150,7 @@ export default async function PublicProductPage({ params }: Props) {
                 </div>
 
                 {/* Checkout Form */}
-                <MockCheckoutClient
-                  productId={product.id}
-                  productName={product.name}
-                  price={displayPrice}
-                />
+                <CheckoutForm productId={product.id} productName={product.name} />
 
                 {/* Trust Indicators */}
                 <div className="flex items-center justify-center gap-4 mt-4 opacity-80">
@@ -172,7 +165,7 @@ export default async function PublicProductPage({ params }: Props) {
                     <span className="material-symbols-outlined text-[16px]">
                       bolt
                     </span>
-                    <span className="text-[12px]">Instant delivery</span>
+                    <span className="text-[12px]">Secure delivery</span>
                   </div>
                 </div>
               </div>
@@ -180,12 +173,5 @@ export default async function PublicProductPage({ params }: Props) {
           </div>
         </div>
       </main>
-    </>
-  );
-}
-
-// Deterministic random for waveform
-function seededRandom(seed: number) {
-  const x = Math.sin(seed * 9301 + 49297) * 49297;
-  return x - Math.floor(x);
+    </>  );
 }

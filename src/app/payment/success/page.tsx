@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -12,7 +12,7 @@ interface OrderState {
   product_name: string | null;
 }
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
 
@@ -306,5 +306,19 @@ export default function PaymentSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center px-4">
+          <p className="text-secondary">Confirming your payment...</p>
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

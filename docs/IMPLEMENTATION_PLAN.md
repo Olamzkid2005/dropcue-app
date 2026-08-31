@@ -9,7 +9,7 @@
 | Database | Supabase PostgreSQL |
 | Object Storage | Supabase Storage (private) |
 | Auth | Supabase Auth (magic link for creators) |
-| Payments | Stripe + Korapay (behind provider interface) |
+| Payments | Bachs.io (primary) + Stripe (optional) |
 | Email | Resend |
 | Deployment | Vercel |
 
@@ -272,7 +272,7 @@ beat-delivery/
 │   │   │   │       └── route.ts
 │   │   │   ├── webhooks/
 │   │   │   │   ├── stripe/route.ts
-│   │   │   │   └── korapay/route.ts
+│   │   │   │   └── bachs/route.ts
 │   │   │   └── delivery/
 │   │   │       └── [token]/
 │   │   │           └── files/
@@ -305,7 +305,7 @@ beat-delivery/
 │   │   │   │   ├── actions.ts
 │   │   │   │   ├── queries.ts
 │   │   │   │   ├── stripe.ts         # Stripe adapter
-│   │   │   │   ├── korapay.ts        # Korapay adapter
+│   │   │   │   ├── bachs.ts          # Bachs adapter
 │   │   │   │   └── provider.ts       # Provider interface
 │   │   │   ├── types.ts
 │   │   │   └── validations.ts
@@ -639,7 +639,7 @@ CREATE TABLE orders (
   amount INTEGER NOT NULL,  -- Amount paid
   currency TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',  -- pending, paid, failed, refunded
-  payment_provider TEXT NOT NULL,  -- stripe, korapay
+  payment_provider TEXT NOT NULL,  -- stripe, bachs
   payment_reference TEXT,  -- Provider's payment reference
   provider_session_id TEXT,  -- Checkout session ID
   paid_at TIMESTAMPTZ,
@@ -658,7 +658,7 @@ CREATE INDEX idx_orders_status ON orders(status);
 ```sql
 CREATE TABLE payment_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  provider TEXT NOT NULL,  -- stripe, korapay
+  provider TEXT NOT NULL,  -- stripe, bachs
   provider_event_id TEXT UNIQUE NOT NULL,  -- Webhook event ID for idempotency
   event_type TEXT NOT NULL,
   order_id UUID REFERENCES orders(id),
@@ -740,7 +740,7 @@ export interface PaymentProvider {
   /**
    * Convert our internal Money format to the provider's expected amount.
    * Stripe: uses smallest unit (kobo) - pass through as-is
-   * Korapay: uses whole units (e.g., 5000 for ₦5,000) - divide by 100
+   * Bachs: uses decimal currency units (e.g., 5000.00 for ₦5,000)
    */
   formatAmount(money: Money): number | string;
   
@@ -751,41 +751,21 @@ export interface PaymentProvider {
     buyer_email?: string;
     success_url: string;
     cancel_url: string;
-    webhook_url: string;
   }): Promise<{
     session_id: string;
     checkout_url: string;
   }>;
   
   verifyWebhook(
-    payload: unknown,
+    rawBody: string,
     headers: Headers
   ): Promise<WebhookVerificationResult>;
-  
-  /**
-   * Verify transaction directly with provider.
-   * Required for Korapay ( Charge Query API ).
-   * Optional for Stripe (webhook signature sufficient).
-   */
-  verifyTransaction(paymentReference: string): Promise<VerifiedTransaction>;
-  
-  /**
-   * Parse webhook payload into standardized payment event.
-   */
-  parseWebhook(payload: unknown): PaymentEvent;
 }
 
 export interface WebhookVerificationResult {
   valid: boolean;
   event?: PaymentEvent;
   error?: string;
-}
-
-export interface VerifiedTransaction {
-  status: 'success' | 'failed' | 'pending';
-  amount: Money;
-  currency: string;
-  reference: string;
 }
 
 export interface PaymentEvent {
@@ -798,21 +778,21 @@ export interface PaymentEvent {
 // src/lib/payments/index.ts
 
 import { StripeProvider } from './stripe';
-import { KorapayProvider } from './korapay';
+import { BachsProvider } from './bachs';
 
 export function getPaymentProvider(provider: string): PaymentProvider {
   switch (provider) {
     case 'stripe':
       return new StripeProvider();
-    case 'korapay':
-      return new KorapayProvider();
+    case 'bachs':
+      return new BachsProvider();
     default:
       throw new Error(`Unknown payment provider: ${provider}`);
   }
 }
 ```
 
-### Korapay Adapter (V1)
+### Bachs Adapter (V1)
 
 **Checkout Flow:**
 
@@ -821,9 +801,9 @@ POST /api/checkout/:productId
    ↓
 Create order (status: pending)
    ↓
-POST /api/payments/korapay/create
+POST /api/checkout/:productId
    ↓
-Korapay Initialize API
+Bachs checkout API
    ↓
 Redirect to hosted checkout
    ↓
@@ -833,18 +813,18 @@ redirect_url → success page
    ↓
 "Confirming your payment..."
    ↓
-Korapay webhook → backend
+Bachs webhook → backend
 ```
 
-**Webhook Event:** `charge.success` (NOT `charge.successful`)
+**Webhook Event:** `collection.succeeded`
 
 **Signature Verification:**
 
 ```text
 HMAC-SHA256(
-    JSON.stringify(webhook.data),
-    KORAPAY_SECRET_KEY
-) == x-korapay-signature
+    `${timestamp}.${raw_body}`,
+    BACHS_WEBHOOK_SECRET
+) == x-bachs-signature
 ```
 
 **Transaction Verification:**
@@ -865,7 +845,7 @@ Response includes:
 ```text
 Internal (database):  500000 (kobo)
 Display:              ₦5,000
-Korapay API:          5000 (whole units)
+Bachs API:            5000.00 (decimal units)
 ```
 
 **Webhook Handling:**
@@ -877,12 +857,12 @@ Verify HMAC signature
    Invalid → return 4xx
    ↓
 Parse event type
-   charge.success → continue
+   collection.succeeded → continue
    Other → return 200
    ↓
 Get payment reference
    ↓
-Call Korapay Charge Query API
+Verify the payment with the provider API when supported
    ↓
 Verify transaction:
    status = success
@@ -908,9 +888,9 @@ Email job (async)
 - Pay with Bank
 
 **Webhook Retries:**
-- Korapay retries for up to 72 hours
+- Bachs retries according to its webhook delivery policy
 - Non-200 responses trigger retries
-- Always return 200 for valid webhooks (even if processing fails)
+- Return a non-2xx response when processing fails so the provider can retry
 - Use idempotency to prevent duplicate fulfillment
 
 ### Storage Interface
@@ -1119,7 +1099,7 @@ Your payment for "Summer Nights" was successful.
 
 This download link expires in 24 hours.
 
-Payment reference: KPY-123456
+Payment reference: BACHS-123456
 
 Thanks,
 Your App
@@ -1286,9 +1266,9 @@ Payment provider webhook → our backend
 
 ```typescript
 POST /api/webhooks/stripe
-POST /api/webhooks/korapay
+POST /api/webhooks/bachs
 Body: Raw webhook payload with signature headers
-Response: 200 OK (always, even on errors for webhook reliability)
+Response: 2xx when processed; non-2xx on processing failure so providers can retry
 ```
 
 ### Delivery Endpoints
@@ -1456,7 +1436,7 @@ export function checkRateLimit(
 // Must verify signatures before processing
 // Never trust unsigned payloads
 // Store provider_event_id for idempotency
-// Always return 200 to provider
+// Return non-2xx on processing errors so the provider can retry
 ```
 
 ### Webhook Processing Sequence
@@ -1774,7 +1754,7 @@ The page's job is to take someone who already said "I want this" and remove the 
 ### Phase 5: Payment Module (Day 7-9) ✅ COMPLETE
 1. Define PaymentProvider interface
 2. Implement Stripe adapter
-3. Implement Korapay adapter
+3. Implement Bachs adapter
 4. Create checkout session endpoint
 5. Build checkout page UI
 6. Implement webhook handlers
@@ -1841,10 +1821,9 @@ STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
-# Korapay
-KORAPAY_SECRET_KEY=
-KORAPAY_PUBLIC_KEY=
-KORAPAY_WEBHOOK_SECRET=
+# Bachs
+BACHS_SECRET_KEY=
+BACHS_WEBHOOK_SECRET=
 
 # Resend
 RESEND_API_KEY=
@@ -1868,7 +1847,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 | Product variants | One product = one set of files |
 | Discount codes | No coupons or promotions |
 | Tax handling | No VAT/tax calculation |
-| Payout management | Creators use Stripe/Korapay dashboards |
+| Payout management | Creators use the configured provider dashboard |
 | Refund processing | Manual via payment provider |
 | Mobile apps | Web only |
 | Public API | No developer API |
@@ -1885,7 +1864,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Product upload
 - Product page
 - Checkout
-- Stripe + Korapay payments
+- Bachs + optional Stripe payments
 - Webhook verification
 - Orders
 - Delivery tokens
@@ -1952,7 +1931,7 @@ Next.js App (Vercel)
 API Routes
 ├── Products (CRUD with RLS)
 ├── Upload (signed URLs to Supabase Storage)
-├── Checkout (Stripe + Korapay redirect)
+├── Checkout (Bachs + optional Stripe redirect)
 ├── Webhooks (idempotent, verified, atomic)
 ├── Delivery (token → order → product → files)
 ├── Auth (magic link)
@@ -1974,7 +1953,7 @@ Storage (Supabase Private Bucket)
 
 Payments
 ├── Stripe (redirect checkout)
-└── Korapay (redirect checkout, charge.success event)
+└── Bachs (redirect checkout, collection.succeeded event)
 
 Email (Resend + React Email)
 ├── Purchase + Download (combined)
@@ -2012,7 +1991,7 @@ Shall we begin?
 1. ✅ Creator can upload files in under 2 minutes
 2. ✅ Creator can set price and generate shareable link
 3. ✅ Buyer can open link and see checkout page
-4. ✅ Buyer can complete payment via Stripe or Korapay
+4. ✅ Buyer can complete payment via Bachs or Stripe
 5. ✅ Backend verifies payment via webhook
 6. ✅ Buyer receives secure, time-limited download access
 7. ✅ Creator does nothing after sharing link

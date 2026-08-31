@@ -198,9 +198,6 @@ export function FileUpload({
     [router]
   );
 
-  const completedCount = uploads.filter(
-    (u) => u.status === "done"
-  ).length;
   const activeUploads = uploads.filter(
     (u) => u.status === "uploading" || u.status === "completing" || u.status === "pending"
   );

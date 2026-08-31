@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { submitFeedback } from "@/modules/feedback/server/actions";
 import { FEEDBACK_CATEGORIES } from "@/modules/feedback/types";
 
@@ -12,7 +13,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 interface FeedbackButtonProps {
-  pageUrl: string;
+  pageUrl?: string;
   productId?: string;
   orderId?: string;
 }
@@ -22,6 +23,7 @@ export function FeedbackButton({
   productId,
   orderId,
 }: FeedbackButtonProps) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState<string>("");
   const [message, setMessage] = useState("");
@@ -60,7 +62,7 @@ export function FeedbackButton({
             | "general",
           message: message.trim(),
           email: email.trim() || undefined,
-          page_url: pageUrl,
+          page_url: pageUrl ?? pathname,
           product_id: productId,
           order_id: orderId,
         });
@@ -77,7 +79,7 @@ export function FeedbackButton({
         setSubmitting(false);
       }
     },
-    [category, message, email, pageUrl, productId, orderId, handleClose]
+    [category, message, email, pageUrl, pathname, productId, orderId, handleClose]
   );
 
   return (

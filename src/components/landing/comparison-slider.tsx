@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 
 export function ComparisonSlider() {
   const [sliderPos, setSliderPos] = useState(50);
+  const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
@@ -30,6 +31,14 @@ export function ComparisonSlider() {
   }, [handleMove]);
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => setContainerWidth(container.offsetWidth);
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(container);
+
     const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
     const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
     const handleEnd = () => {
@@ -42,6 +51,7 @@ export function ComparisonSlider() {
     window.addEventListener("touchend", handleEnd);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleEnd);
       window.removeEventListener("touchmove", handleTouchMove);
@@ -73,7 +83,7 @@ export function ComparisonSlider() {
           src="/creator-view.png"
           alt="Creator dashboard view"
           className="absolute inset-0 h-full object-cover"
-          style={{ width: `${containerRef.current?.offsetWidth ?? 1000}px` }}
+          style={{ width: `${containerWidth}px` }}
           draggable={false}
         />
       </div>

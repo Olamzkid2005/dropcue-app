@@ -55,19 +55,20 @@ export function CreatorSidebar() {
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-[260px] bg-paper border-r border-hairline z-40">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-6 h-16 border-b border-hairline">
-        <Link href="/" className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Dropcue" className="h-8 w-auto" />
-          <span className="text-lg font-semibold tracking-tight font-[family-name:var(--font-geist)]">
-            Dropcue
-          </span>
+      <div className="flex items-center px-6 h-16 border-b border-hairline">
+        <Link href="/" aria-label="Dropcue home" className="block h-10 w-[132px] overflow-hidden rounded-md">
+          <img
+            src="/logo.png"
+            alt="Dropcue"
+            className="h-full w-full object-cover object-center scale-[1.7]"
+          />
         </Link>
       </div>
 
       {/* New Product CTA */}
       <div className="px-4 pt-6 pb-2">
         <Link
-          href="/products/new"
+          href="/dashboard/products/new"
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-ink text-white text-sm font-medium rounded-xl hover:bg-ink/90 transition-all duration-200 active:scale-[0.98]"
         >
           <i className="fa-solid fa-plus text-xs" />
@@ -141,7 +142,7 @@ export function MobileNav() {
   const items = [
     { icon: "fa-solid fa-grid-2", label: "Home", href: "/dashboard" },
     { icon: "fa-solid fa-box-open", label: "Products", href: "/dashboard/products" },
-    { icon: "fa-solid fa-plus", label: "New", href: "/products/new" },
+    { icon: "fa-solid fa-plus", label: "New", href: "/dashboard/products/new" },
     { icon: "fa-solid fa-receipt", label: "Orders", href: "/dashboard/orders" },
     { icon: "fa-solid fa-gear", label: "Settings", href: "/dashboard/settings" },
   ];
@@ -152,7 +153,7 @@ export function MobileNav() {
   };
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper/90 backdrop-blur-xl border-t border-hairline safe-area-pb">
+    <nav aria-label="Dashboard navigation" className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper/90 backdrop-blur-xl border-t border-hairline safe-area-pb">
       <div className="flex items-center justify-around h-16 px-2">
         {items.map((item) => {
           const active = isActive(item.href);

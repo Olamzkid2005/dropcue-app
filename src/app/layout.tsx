@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
-import Link from "next/link";
 import { FeedbackButton } from "@/components/feedback/feedback-button";
 import "./globals.css";
 
@@ -19,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Dropcue — Sell Your Digital Products Instantly",
   description:
-    "The simplest way for creators to sell digital products and get paid instantly.",
+    "The simplest way for creators to sell digital products and track secure delivery.",
 };
 
 export default function RootLayout({
@@ -52,7 +51,7 @@ export default function RootLayout({
       </head>
       <body className={`${geist.variable} ${inter.variable} antialiased`}>
         {children}
-        <FeedbackButton pageUrl="/" />
+        <FeedbackButton />
       </body>
     </html>
   );

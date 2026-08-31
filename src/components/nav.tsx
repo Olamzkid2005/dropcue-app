@@ -62,7 +62,7 @@ export function Nav() {
           {user ? (
             <>
               <Link
-                href="/products/new"
+                href="/dashboard/products/new"
                 className="hidden md:flex bg-accent-indigo text-white px-4 py-2 rounded-lg text-[13px] font-semibold hover:bg-accent-indigo/90 transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.97] items-center gap-1.5"
               >
                 <span className="material-symbols-outlined text-[16px]">add</span>

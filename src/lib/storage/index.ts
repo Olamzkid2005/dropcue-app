@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const BUCKET_NAME = "product-files";
+const BUCKET_NAME = "products";
 
 export interface StorageProvider {
   generateUploadUrl(
@@ -17,7 +17,7 @@ export interface StorageProvider {
 }
 
 export const supabaseStorage: StorageProvider = {
-  async generateUploadUrl(path, options) {
+  async generateUploadUrl(path) {
     const supabase = createAdminClient();
 
     const { data, error } = await supabase.storage

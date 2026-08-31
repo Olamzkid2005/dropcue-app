@@ -74,7 +74,7 @@ export function CheckoutDemo() {
               <i className="fa-solid fa-lock text-accent" /> Secure checkout
             </span>
             <span className="flex items-center gap-1.5 text-xs text-muted">
-              <i className="fa-solid fa-bolt text-accent" /> Instant delivery
+              <i className="fa-solid fa-lock text-accent" /> Secure delivery
             </span>
           </div>
         </form>

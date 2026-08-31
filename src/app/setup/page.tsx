@@ -26,19 +26,34 @@ export default function SetupPage() {
     }
   }, []);
 
-  const loadSql = useCallback(async () => {
-    try {
-      const res = await fetch("/api/setup/sql");
-      if (res.ok) setSql(await res.text());
-    } catch {
-      // ignore
-    }
-  }, []);
-
   useEffect(() => {
-    checkStatus();
-    loadSql();
-  }, [checkStatus, loadSql]);
+    let cancelled = false;
+
+    async function loadInitialData() {
+      try {
+        const [statusRes, sqlRes] = await Promise.all([
+          fetch("/api/setup/status"),
+          fetch("/api/setup/sql"),
+        ]);
+        if (cancelled) return;
+        if (!statusRes.ok) throw new Error("Failed to check status");
+        const statusData = await statusRes.json();
+        setTableStatus(statusData.tables);
+        if (sqlRes.ok) setSql(await sqlRes.text());
+      } catch (e: unknown) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Unknown error");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void loadInitialData();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const copySql = async () => {
     await navigator.clipboard.writeText(sql);
@@ -51,7 +66,7 @@ export default function SetupPage() {
   const tablesTotal = tables.length;
   const allReady = tables.length > 0 && tables.every(([, ok]) => ok);
 
-  const supabaseDashboardUrl = `https://supabase.com/dashboard/project/keomdmxshloecxtfybpc/sql/new`;
+  const supabaseDashboardUrl = "https://supabase.com/dashboard";
 
   return (
     <div className="min-h-screen bg-surface-canvas flex items-center justify-center p-4">
@@ -229,8 +244,7 @@ export default function SetupPage() {
                   <p className="text-sm text-secondary mt-1">
                     In Supabase Dashboard → Storage → New bucket:
                   </p>
-                  <ul className="text-sm text-secondary mt-2 space-y-1 ml-4">
-                    <li>
+                  <ul className="text-sm text-secondary mt-2 space-y-1 ml-4">                    <li>
                       • Bucket name: <code className="bg-surface-container-low px-1 rounded">products</code>
                     </li>
                     <li>• Public: No</li>

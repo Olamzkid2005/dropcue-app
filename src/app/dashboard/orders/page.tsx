@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -50,19 +49,6 @@ function formatDate(dateStr: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function timeAgo(dateStr: string): string {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
 }
 
 export default function OrdersPage() {

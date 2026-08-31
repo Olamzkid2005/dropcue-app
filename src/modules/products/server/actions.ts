@@ -5,10 +5,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { generatePublicId } from "@/lib/security/tokens";
 import { logAuditEvent } from "@/lib/audit";
 import { createProductSchema, updateProductSchema } from "../validations";
-import type { CreateProductInput, UpdateProductInput, Product, ProductWithFiles } from "../types";
+import type { CreateProductInput, UpdateProductInput, ProductWithFiles } from "../types";
 import { revalidatePath } from "next/cache";
 
-async function ensureCreator(supabase: ReturnType<typeof createClient> extends Promise<infer T> ? T : never, userId: string, email: string) {
+async function ensureCreator(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  email: string
+) {
   const { data } = await supabase.from("creators").select("id").eq("id", userId).single();
   if (!data) {
     await supabase.from("creators").insert({ id: userId, email });
@@ -68,6 +72,8 @@ export async function createProduct(input: CreateProductInput) {
 
   revalidatePath("/");
   revalidatePath("/products");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/products");
 
   return { success: true, error: null, product };
 }
@@ -107,7 +113,23 @@ export async function updateProduct(productId: string, input: UpdateProductInput
   if (parsed.data.name !== undefined) updateData.name = parsed.data.name;
   if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
   if (parsed.data.price_amount !== undefined) updateData.price_amount = Math.round(parsed.data.price_amount * 100);
-  if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
+  if (parsed.data.status !== undefined) {
+    if (parsed.data.status === "published") {
+      const { count } = await supabase
+        .from("files")
+        .select("id", { count: "exact", head: true })
+        .eq("product_id", productId)
+        .eq("status", "uploaded");
+      if (!count) {
+        return {
+          success: false,
+          error: "Upload at least one file before publishing",
+          product: null,
+        };
+      }
+    }
+    updateData.status = parsed.data.status;
+  }
 
   const { data: product, error } = await supabase
     .from("products")
@@ -121,17 +143,31 @@ export async function updateProduct(productId: string, input: UpdateProductInput
   }
 
   if (parsed.data.status === "archived") {
+    await supabase
+      .from("files")
+      .update({
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      })
+      .eq("product_id", productId)
+      .is("expires_at", null);
     await logAuditEvent("product_archived", "product", product.id);
+  } else if (parsed.data.status === "published") {
+    await supabase
+      .from("files")
+      .update({ expires_at: null })
+      .eq("product_id", productId);
   }
 
   revalidatePath("/");
   revalidatePath("/products");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/products");
   revalidatePath(`/products/${productId}`);
 
   return { success: true, error: null, product };
 }
 
-export async function deleteProduct(productId: string, permanent = false) {
+export async function deleteProduct(productId: string) {
   const supabase = await createClient();
 
   const {
@@ -153,43 +189,34 @@ export async function deleteProduct(productId: string, permanent = false) {
     return { success: false, error: "Product not found" };
   }
 
-  if (permanent) {
-    const { data, error } = await supabase.rpc("permanently_delete_product", {
-      p_product_id: productId,
-    });
+  // Purchased products remain financial history. Archive by default so
+  // existing orders and delivery records keep their product reference.
+  const { error } = await supabase
+    .from("products")
+    .update({ status: "archived" })
+    .eq("id", productId)
+    .eq("creator_id", user.id);
 
-    if (error) {
-      return { success: false, error: error.message };
-    }
-    if (!data) {
-      return { success: false, error: "Product could not be permanently deleted" };
-    }
-
-    await logAuditEvent("product_deleted", "product", productId, {
-      name: existing.name,
-      requested_action: "permanent_delete",
-    });
-  } else {
-    // Purchased products remain financial history. Archive by default so
-    // existing orders and delivery records keep their product reference.
-    const { error } = await supabase
-      .from("products")
-      .update({ status: "archived" })
-      .eq("id", productId)
-      .eq("creator_id", user.id);
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    await logAuditEvent("product_archived", "product", productId, {
-      name: existing.name,
-      requested_action: "delete",
-    });
+  if (error) {
+    return { success: false, error: error.message };
   }
+
+  await supabase
+    .from("files")
+    .update({
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    })
+    .eq("product_id", productId)
+    .is("expires_at", null);
+
+  await logAuditEvent("product_archived", "product", productId, {
+    name: existing.name,
+    requested_action: "archive",
+  });
 
   revalidatePath("/");
   revalidatePath("/products");
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/products");
 
   return { success: true, error: null };
@@ -241,7 +268,7 @@ export async function getPublicProduct(publicId: string): Promise<{ product: Pro
 
   const { data: product } = await admin
     .from("products")
-    .select("*, files!inner(*)")
+    .select("*, files(id, product_id, original_filename, mime_type, file_size, status, expires_at, created_at)")
     .eq("public_id", publicId)
     .eq("status", "published")
     .single();

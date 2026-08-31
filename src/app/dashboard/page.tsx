@@ -113,7 +113,7 @@ function WelcomeState({ userName }: { userName: string }) {
         Welcome to Dropcue{userName ? `, ${userName.split("@")[0]}` : ""}
       </h1>
       <p className="text-muted text-lg text-center max-w-md mb-10 leading-relaxed">
-        Upload, price, and share your digital products. Get paid instantly. It takes less than five minutes.
+        Upload, price, and share your digital products. Track secure delivery in one place.
       </p>
 
       {/* Big CTA */}
@@ -157,11 +157,11 @@ function WelcomeState({ userName }: { userName: string }) {
         </span>
         <span className="flex items-center gap-1.5">
           <i className="fa-solid fa-bolt text-ink" />
-          Instant payouts
+          Track completed sales
         </span>
         <span className="flex items-center gap-1.5">
           <i className="fa-solid fa-naira-sign text-ink" />
-          Zero fees to start
+          Start with no monthly fee
         </span>
       </div>
     </div>
@@ -205,9 +205,7 @@ function DashboardView({ stats, loading }: { stats: DashboardStats; loading: boo
           <div className="text-3xl font-semibold tracking-tight font-[family-name:var(--font-geist)]">
             {loading ? <div className="h-8 w-24 bg-hairline rounded-lg animate-pulse" /> : formatNaira(stats.totalRevenue)}
           </div>
-          <p className="text-xs text-muted mt-2 flex items-center gap-1.5">
-            <i className="fa-solid fa-arrow-trend-up text-[10px]" />
-            From completed sales
+          <p className="text-xs text-muted mt-2 flex items-center gap-1.5">              From completed sales
           </p>
         </div>
 
@@ -273,7 +271,7 @@ function DashboardView({ stats, loading }: { stats: DashboardStats; loading: boo
           </div>
           <div>
             <h3 className="text-sm font-medium">View Orders</h3>
-            <p className="text-xs text-muted mt-0.5">Track sales and payouts</p>
+            <p className="text-xs text-muted mt-0.5">Track completed sales</p>
           </div>
         </Link>
       </div>
@@ -450,9 +448,6 @@ export default function DashboardPage() {
       <header className="sticky top-0 z-30 bg-paper/90 backdrop-blur-xl border-b border-hairline">
         <div className="flex items-center justify-between h-16 px-6 lg:px-10 max-w-[1200px] mx-auto">
           <div className="flex items-center gap-4">
-            <Link href="/" className="lg:hidden flex items-center gap-2">
-              <img src="/logo.png" alt="Dropcue" className="h-8 w-auto" />
-            </Link>
             <h1 className="text-lg font-semibold font-[family-name:var(--font-geist)]">
               {loading ? "Dropcue" : hasProducts ? "Dashboard" : "Dropcue"}
             </h1>

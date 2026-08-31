@@ -83,7 +83,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
       }
     } catch {
-      // Supabase client creation failed — proceed without auth
+      if (isProtectedAppRoute) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/auth/login";
+        url.searchParams.set("next", pathname);
+        return applySecurityHeaders(NextResponse.redirect(url));
+      }
     }
   }
 

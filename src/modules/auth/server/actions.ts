@@ -28,11 +28,7 @@ export async function signUp(email: string, password: string) {
   return { success: true, error: null };
 }
 
-export async function signIn(
-  email: string,
-  password: string,
-  rememberMe: boolean = true
-) {
+export async function signIn(email: string, password: string) {
   let supabase;
   try {
     supabase = await createClient();

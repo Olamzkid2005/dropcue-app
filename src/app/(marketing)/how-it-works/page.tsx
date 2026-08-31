@@ -36,23 +36,22 @@ export default function HowItWorksPage() {
               Drop in your file, we handle the rest
             </h2>
             <p className="text-muted text-lg leading-relaxed">
-              Upload audio, zip archives, PDFs, or video directly from your
-              browser. Dropcue stores it securely and generates a private,
-              tamper-proof delivery copy — no separate hosting or file links to
-              manage.
+              Upload audio, images, zip archives, or PDFs directly from your
+              browser.              Dropcue stores it in a private bucket and creates secure download
+              access after a verified purchase.
             </p>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-3">
                 <i className="fa-solid fa-circle-check text-accent" />
-                Supports audio, video, ZIP, PDF and image files
+                Supports audio, image, ZIP, PDF, and archive files
               </li>
               <li className="flex items-center gap-3">
                 <i className="fa-solid fa-circle-check text-accent" />
-                Files up to 2GB on the free plan
+                Files up to 500MB each
               </li>
               <li className="flex items-center gap-3">
                 <i className="fa-solid fa-circle-check text-accent" />
-                Automatic virus and integrity scanning
+                Upload progress and file checks
               </li>
             </ul>
           </div>
@@ -63,7 +62,7 @@ export default function HowItWorksPage() {
               </div>
               <p className="font-medium">Drag and drop your file here</p>
               <p className="text-sm text-muted">
-                or click to browse — MP3, WAV, ZIP, PDF up to 2GB
+                or click to browse — MP3, WAV, ZIP, PDF up to 500MB
               </p>
             </div>
             <div className="mt-4 bg-gray-50 rounded-xl p-4 flex items-center gap-3">
@@ -100,10 +99,9 @@ export default function HowItWorksPage() {
               </div>
             </div>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-hairline">
-              <div>
-                <p className="text-sm font-medium">Pay-what-you-want</p>
+              <div>                  <p className="text-sm font-medium">Fixed price</p>
                 <p className="text-xs text-muted">
-                  Let buyers choose an amount above your minimum
+                  Choose the amount buyers pay
                 </p>
               </div>
               <div className="w-11 h-6 bg-hairline rounded-full relative">
@@ -111,10 +109,9 @@ export default function HowItWorksPage() {
               </div>
             </div>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-hairline">
-              <div>
-                <p className="text-sm font-medium">Limited licenses</p>
+              <div>                  <p className="text-sm font-medium">Automatic delivery</p>
                 <p className="text-xs text-muted">
-                  Cap how many times this can be sold
+                  Files become available after payment is verified
                 </p>
               </div>
               <div className="w-11 h-6 bg-accent rounded-full relative">
@@ -131,13 +128,11 @@ export default function HowItWorksPage() {
                 Price
               </span>
             </div>
-            <h2 className="text-3xl font-semibold tracking-tight">
-              You decide what it&apos;s worth
+            <h2 className="text-3xl font-semibold tracking-tight">                Set a clear price for your product
             </h2>
             <p className="text-muted text-lg leading-relaxed">
-              Set a fixed price, allow pay-what-you-want, or cap the number of
-              licenses available. No tiers, no bundles to configure — just the
-              price that makes sense for this file.
+              Set a fixed price in Naira. No tiers or bundles to configure — just
+              the price that makes sense for your product.
             </p>
           </div>
         </div>
@@ -236,9 +231,9 @@ export default function HowItWorksPage() {
                   <i className="fa-solid fa-building-columns text-accent" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Payout on the way</p>
+                  <p className="text-sm font-medium">Order recorded</p>
                   <p className="text-xs text-muted">
-                    Deposits to your bank instantly
+                    Payment provider handles settlement
                   </p>
                 </div>
               </div>
@@ -254,12 +249,11 @@ export default function HowItWorksPage() {
               </span>
             </div>
             <h2 className="text-3xl font-semibold tracking-tight">
-              Delivery and payout, automatically
+              Delivery and order tracking, automatically
             </h2>
             <p className="text-muted text-lg leading-relaxed">
-              The moment a buyer pays, Dropcue verifies the transaction, sends
-              the file to their inbox with a secure download link, and starts
-              your payout. You never touch a support ticket or a manual transfer.
+              After a buyer pays, Dropcue verifies the transaction, creates a
+              secure download link, and records the order for you.
             </p>
           </div>
         </div>

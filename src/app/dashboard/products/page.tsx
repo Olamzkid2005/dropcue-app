@@ -109,36 +109,35 @@ export default function ProductsPage() {
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deletePermanently, setDeletePermanently] = useState(false);
 
   useEffect(() => {
+    async function loadProducts() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data } = await supabase
+          .from("products")
+          .select("*")
+          .eq("creator_id", user.id)
+          .order("created_at", { ascending: false });
+
+        setProducts((data ?? []) as Product[]);
+      } catch (err) {
+        console.error("Failed to load products:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadProducts();
   }, []);
-
-  async function loadProducts() {
-    try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("products")
-        .select("*")
-        .eq("creator_id", user.id)
-        .order("created_at", { ascending: false });
-
-      setProducts((data ?? []) as Product[]);
-    } catch (err) {
-      console.error("Failed to load products:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    const result = await deleteProduct(deleteTarget.id, deletePermanently);
+    const result = await deleteProduct(deleteTarget.id);
     if (result.success) {
       setProducts((prev) => prev.map((p) =>
         p.id === deleteTarget.id ? { ...p, status: "archived" } : p
@@ -146,7 +145,6 @@ export default function ProductsPage() {
     }
     setIsDeleting(false);
     setDeleteTarget(null);
-    setDeletePermanently(false);
   }
 
   const filtered = filter === "all" ? products : products.filter((p) => p.status === filter);
@@ -290,20 +288,8 @@ export default function ProductsPage() {
               Delete Product?
             </h3>
             <p className="text-sm text-muted text-center mb-6">
-              {deletePermanently
-                ? <>This permanently deletes <strong>{deleteTarget.name}</strong>. This is only available if it has no orders.</>
-                : <>This will archive <strong>{deleteTarget.name}</strong> and hide it from buyers. Existing orders and download history will be preserved.</>}
+              This will archive <strong>{deleteTarget.name}</strong> and hide it from buyers. Existing orders and download history will be preserved while retained files remain available.
             </p>
-            <label className="flex items-start gap-3 mb-6 text-sm text-muted cursor-pointer">
-              <input
-                type="checkbox"
-                checked={deletePermanently}
-                onChange={(e) => setDeletePermanently(e.target.checked)}
-                disabled={isDeleting}
-                className="mt-0.5 rounded border-hairline text-red-600 focus:ring-red-500"
-              />
-              <span><strong className="text-red-600">Permanently delete</strong> instead of archive. This will fail if the product has orders.</span>
-            </label>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
@@ -315,16 +301,16 @@ export default function ProductsPage() {
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className={`flex-1 px-4 py-2.5 ${deletePermanently ? "bg-red-700 hover:bg-red-800" : "bg-red-600 hover:bg-red-700"} text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-all flex items-center justify-center gap-2`}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
 
               >
                 {isDeleting ? (
                   <>
                     <i className="fa-solid fa-spinner fa-spin text-xs" />
-                    Deleting...
+                    Archiving...
                   </>
                 ) : (
-                  "Delete"
+                  "Archive"
                 )}
               </button>
             </div>

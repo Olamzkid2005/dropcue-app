@@ -126,15 +126,16 @@ export async function sendFeedbackNotification(data: FeedbackNotificationData) {
       throw error;
     }
 
-    await logAuditEvent("email_sent", "feedback", "feedback", {
+    await logAuditEvent("email_sent", "feedback", data.feedback_id, {
       type: "feedback_notification",
+      feedback_id: data.feedback_id,
       to: adminEmail,
       category: data.category,
     });
 
     return { success: true };
   } catch (err) {
-    await logAuditEvent("email_failed", "feedback", "feedback", {
+    await logAuditEvent("email_failed", "feedback", data.feedback_id, {
       type: "feedback_notification",
       error: err instanceof Error ? err.message : "Unknown error",
     });

@@ -25,6 +25,7 @@ export interface FeedbackNotificationData {
   user_id: string | null;
   product_id: string | null;
   order_id: string | null;
+  feedback_id: string;
   user_agent: string | null;
   submitted_at: string;
 }

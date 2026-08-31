@@ -3,23 +3,23 @@ import Link from "next/link";
 const pillars = [
   {
     icon: "fa-solid fa-shield-halved",
-    title: "Encrypted storage",
-    desc: "Files are encrypted at rest and in transit, stored on redundant cloud infrastructure with automatic backups.",
+    title: "Private storage",
+    desc: "Your files stay in a private storage bucket and are accessed through short-lived signed URLs.",
   },
   {
     icon: "fa-solid fa-credit-card",
-    title: "PCI-compliant checkout",
-    desc: "Card details are handled by a certified payment processor. Dropcue never sees or stores raw card numbers.",
+    title: "Provider-hosted checkout",
+    desc: "Payment details are handled by the configured payment provider. Dropcue does not store card numbers.",
   },
   {
     icon: "fa-solid fa-link-slash",
-    title: "Tamper-proof download links",
-    desc: "Delivery links are single-use and expiring, generated only after a payment is verified — never before.",
+    title: "Expiring download links",
+    desc: "Download links are generated after payment is verified and expire automatically.",
   },
   {
     icon: "fa-solid fa-user-shield",
-    title: "Fraud monitoring",
-    desc: "Every transaction is screened in real time to catch stolen cards and chargebacks before they reach you.",
+    title: "Server-verified payments",
+    desc: "Files are released only after a signed provider webhook confirms the payment.",
   },
 ];
 
@@ -27,7 +27,7 @@ const steps = [
   {
     num: "1",
     label: "Buyer pays",
-    desc: "funds are authorized and verified before anything is released.",
+    desc: "the provider confirms the payment before anything is released.",
   },
   {
     num: "2",
@@ -44,7 +44,7 @@ const steps = [
 const buyerTrust = [
   {
     icon: "fa-solid fa-receipt",
-    title: "Instant email receipt",
+    title: "Purchase email",
     desc: "Every purchase is confirmed automatically.",
   },
   {
@@ -73,8 +73,8 @@ export default function SecurityPage() {
           </h1>
           <p className="text-lg text-muted leading-relaxed">
             Every file, payment, and download on Dropcue passes through the same
-            security standards used by major payment processors — without you
-            having to configure anything.
+            practical safeguards for files, payments, and download access —
+            without adding work to your workflow.
           </p>
         </div>
       </section>
@@ -105,10 +105,9 @@ export default function SecurityPage() {
               Your files stay yours until the sale clears
             </h2>
             <p className="text-muted text-lg leading-relaxed">
-              Buyers never access your original file directly. Dropcue only
-              issues a secure, watermarked or single-use delivery copy after a
-              payment has fully processed — protecting you from chargebacks and
-              leaked files.
+              Buyers never access your original file directly. Dropcue issues a
+              signed, expiring download URL only after the payment provider
+              confirms the payment.
             </p>
             <div className="space-y-5">
               {steps.map((s) => (
@@ -129,11 +128,11 @@ export default function SecurityPage() {
               <i className="fa-solid fa-lock text-accent text-3xl" />
             </div>
             <h3 className="text-2xl font-semibold">
-              256-bit encryption, end to end
+              Payment verified before delivery
             </h3>
             <p className="text-muted">
-              From upload to download, your data is protected by the same
-              encryption standard used by banks.
+              Your files remain private until a verified payment creates access
+              to an expiring download link.
             </p>
             <div className="flex items-center justify-center gap-2 pt-2">
               <span className="relative flex h-3 w-3">
@@ -141,7 +140,7 @@ export default function SecurityPage() {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-accent" />
               </span>
               <span className="text-xs text-muted uppercase tracking-widest font-semibold">
-                All systems secure
+                Delivery flow protected
               </span>
             </div>
           </div>
@@ -155,8 +154,7 @@ export default function SecurityPage() {
             Trust that works both ways
           </h2>
           <p className="text-muted text-lg mb-12">
-            Buyers feel safe purchasing from a Dropcue link, which means more
-            completed checkouts for you.
+            Buyers get a clear checkout and receive access only after payment is verified.
           </p>
           <div className="grid sm:grid-cols-3 gap-6 text-left">
             {buyerTrust.map((b) => (

@@ -46,7 +46,9 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
     // Not available in all contexts
   }
 
-  const { error } = await admin.from("feedback").insert({
+  const { data: feedback, error } = await admin
+    .from("feedback")
+    .insert({
     user_id: userId,
     email: email || null,
     category,
@@ -55,14 +57,16 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
     product_id: product_id || null,
     order_id: order_id || null,
     user_agent: userAgent,
-  });
+  })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !feedback) {
     console.error("Failed to submit feedback:", error);
     return { success: false, error: "Failed to submit feedback" };
   }
 
-  await logAuditEvent("feedback_submitted", "feedback", "feedback", {
+  await logAuditEvent("feedback_submitted", "feedback", feedback.id, {
     category,
     page_url,
     has_user: !!userId,
@@ -80,6 +84,7 @@ export async function submitFeedback(input: SubmitFeedbackInput) {
       product_id: product_id || null,
       order_id: order_id || null,
       user_agent: userAgent,
+      feedback_id: feedback.id,
       submitted_at: new Date().toISOString(),
     });
   } catch (err) {

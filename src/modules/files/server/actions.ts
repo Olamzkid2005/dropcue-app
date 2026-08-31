@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { supabaseStorage } from "@/lib/storage";
 import { uploadUrlSchema, uploadCompleteSchema } from "../validations";
 import { FILE_LIMITS } from "../types";
-import { logAuditEvent } from "@/lib/audit";
 import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 
@@ -157,8 +156,9 @@ export async function completeUpload(input: {
   // Verify file exists and product ownership
   const { data: file } = await supabase
     .from("files")
-    .select("id, product_id, status")
+    .select("id, product_id, storage_key, status")
     .eq("id", input.file_id)
+    .eq("status", "uploading")
     .single();
 
   if (!file) {
@@ -179,15 +179,34 @@ export async function completeUpload(input: {
     return { success: false, error: "File does not belong to this product" };
   }
 
+  // Verify the object exists before making it purchasable.
+  try {
+    const lastSlash = file.storage_key.lastIndexOf("/");
+    const folder = lastSlash === -1 ? "" : file.storage_key.slice(0, lastSlash);
+    const filename = file.storage_key.slice(lastSlash + 1);
+    const { data: objects, error: storageError } = await createAdminClient()
+      .storage
+      .from("products")
+      .list(folder, { search: filename, limit: 1 });
+    if (storageError || !objects?.some((object) => object.name === filename)) {
+      return { success: false, error: "Uploaded file was not found" };
+    }
+  } catch {
+    return { success: false, error: "Could not verify uploaded file" };
+  }
+
   // Update file status to uploaded
-  const { error } = await supabase
+  const { data: updatedFile, error } = await supabase
     .from("files")
     .update({ status: "uploaded" })
-    .eq("id", input.file_id);
+    .eq("id", input.file_id)
+    .eq("product_id", input.product_id)
+    .eq("status", "uploading")
+    .select("id")
+    .maybeSingle();
 
-  if (error) {
-    return { success: false, error: error.message };
-  }
+  if (error) return { success: false, error: error.message };
+  if (!updatedFile) return { success: true };
 
   // Auto-evaluate product status
   await evaluateProductStatus(input.product_id);
@@ -270,7 +289,7 @@ async function evaluateProductStatus(productId: string) {
       .single(),
     admin
       .from("files")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("product_id", productId)
       .eq("status", "uploaded"),
   ]);
@@ -280,11 +299,15 @@ async function evaluateProductStatus(productId: string) {
   const hasFiles = (count ?? 0) > 0;
   const hasValidPrice = product.price_amount > 0;
 
-  // Only auto-publish if currently draft; don't auto-unpublish
   if (product.status === "draft" && hasFiles && hasValidPrice) {
     await admin
       .from("products")
       .update({ status: "published" })
+      .eq("id", productId);
+  } else if (product.status === "published" && (!hasFiles || !hasValidPrice)) {
+    await admin
+      .from("products")
+      .update({ status: "draft" })
       .eq("id", productId);
   }
 }

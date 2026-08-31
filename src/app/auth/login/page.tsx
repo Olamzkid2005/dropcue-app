@@ -19,7 +19,6 @@ export default function LoginPage() {
   const [oauthLoading, setOauthLoading] = useState<"google" | "apple" | null>(
     null
   );
-  const [rememberMe, setRememberMe] = useState(true);
 
   function getPasswordStrength(pw: string): {
     score: number;
@@ -48,8 +47,10 @@ export default function LoginPage() {
     setError("");
     setSuccess("");
 
-    const fn = mode === "login" ? signIn : signUp;
-    const result = await fn(email, password, rememberMe);
+    const result =
+      mode === "login"
+        ? await signIn(email, password)
+        : await signUp(email, password);
 
     if (result.success) {
       if (mode === "signup") {
@@ -244,18 +245,8 @@ export default function LoginPage() {
                 )}
               </div>
 
-              {/* Remember me checkbox */}
               {mode === "login" && (
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-hairline text-accent focus:ring-accent"
-                    />
-                    <span className="text-[14px] text-muted">Remember me</span>
-                  </label>
+                <div className="flex justify-end">
                   <Link
                     href="/auth/forgot-password"
                     className="text-[14px] text-accent hover:underline"

@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 const DEMO_PRODUCTS = [
   {
     name: "Midnight Drive Type Beat",
@@ -33,10 +31,6 @@ const STATS = [
 ];
 
 export function DashboardDemo() {
-  const [activeTab, setActiveTab] = useState<"products" | "analytics">(
-    "products"
-  );
-
   return (
     <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden">
       {/* Mini Nav */}
@@ -68,34 +62,9 @@ export function DashboardDemo() {
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-hairline">
-        <button
-          onClick={() => setActiveTab("products")}
-          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
-            activeTab === "products"
-              ? "text-accent border-b-2 border-accent"
-              : "text-muted hover:text-ink"
-          }`}
-        >
-          Products
-        </button>
-        <button
-          onClick={() => setActiveTab("analytics")}
-          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
-            activeTab === "analytics"
-              ? "text-accent border-b-2 border-accent"
-              : "text-muted hover:text-ink"
-          }`}
-        >
-          Analytics
-        </button>
-      </div>
-
       {/* Content */}
       <div className="p-4 space-y-3">
-        {activeTab === "products" ? (
-          DEMO_PRODUCTS.map((p) => (
+        {DEMO_PRODUCTS.map((p) => (
             <div
               key={p.name}
               className="flex items-center gap-3 p-3 rounded-xl border border-hairline hover:border-accent/30 transition-colors"
@@ -127,27 +96,7 @@ export function DashboardDemo() {
                 {p.status}
               </span>
             </div>
-          ))
-        ) : (
-          <div className="space-y-3">
-            <div className="h-24 bg-gray-50 rounded-xl border border-hairline flex items-end px-4 pb-3 gap-2">
-              {[40, 65, 30, 80, 55, 70, 90, 45, 75, 60, 85, 50].map(
-                (h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 bg-accent/20 rounded-t hover:bg-accent/40 transition-colors"
-                    style={{ height: `${h}%` }}
-                  />
-                )
-              )}
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted px-1">
-              <span>Jan</span>
-              <span>Jun</span>
-              <span>Dec</span>
-            </div>
-          </div>
-        )}
+          ))}
       </div>
     </div>
   );
