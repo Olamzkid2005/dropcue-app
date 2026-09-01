@@ -34,7 +34,7 @@ export async function sendPurchaseReadyEmail(params: {
   const { subject, html } = renderPurchaseReadyEmail(emailData);
 
   // Create email delivery record
-  const { data: emailRecord } = await admin
+  const { data: emailRecord, error: emailRecordError } = await admin
     .from("email_deliveries")
     .insert({
       order_id: params.order_id,
@@ -43,6 +43,10 @@ export async function sendPurchaseReadyEmail(params: {
     })
     .select()
     .single();
+
+  if (emailRecordError) {
+    console.error("Failed to create email delivery record:", emailRecordError);
+  }
 
   try {
     const resend = getResendClient();
