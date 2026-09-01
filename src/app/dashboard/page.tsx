@@ -567,17 +567,7 @@ export default function DashboardPage() {
               {loading ? "Dropcue" : hasProducts ? "Dashboard" : "Dropcue"}
             </h1>
           </div>
-          {hasProducts && (
-            <div className="flex items-center gap-3">
-              <Link
-                href="/dashboard/products/new"
-                className="flex items-center gap-2 bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-ink/90 transition-all duration-200 active:scale-[0.98]"
-              >
-                <i className="fa-solid fa-plus text-xs" />
-                <span className="hidden sm:inline">New Product</span>
-              </Link>
-            </div>
-          )}
+
         </div>
       </header>
 

@@ -1,5 +1,4 @@
-import { notFound}
- from "next/navigation";
+import { notFound } from "next/navigation";
 import { getPublicProduct}
  from "@/modules/products/server/actions";
 import { formatDisplayPrice, createMoney}

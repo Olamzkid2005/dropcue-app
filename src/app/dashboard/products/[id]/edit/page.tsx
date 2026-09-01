@@ -275,7 +275,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     setIsSaving(false);
   }
 
-  async function handleDelete() {
+  async function handleDelete(e?: React.MouseEvent<HTMLButtonElement>) {
+    e?.preventDefault();
     setIsDeleting(true);
     const result = await deleteProduct(id, deletePermanently);
     if (result.success) {
@@ -284,6 +285,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       setError(result.error ?? "Failed to delete product");
       setIsDeleting(false);
       setShowDeleteConfirm(false);
+      setDeletePermanently(false);
     }
   }
 

@@ -303,7 +303,7 @@ export async function getPublicProduct(publicId: string): Promise<{ product: Pro
     .select("*, files(id, product_id, original_filename, mime_type, file_size, status, expires_at, created_at)")
     .eq("public_id", publicId)
     .eq("status", "published")
-    .single();
+    .maybeSingle();
 
   if (!product) return { product: null };
 

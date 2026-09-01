@@ -10,11 +10,11 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-paper">
       <CreatorSidebar />
       <header className="lg:hidden h-16 px-5 flex items-center border-b border-hairline bg-paper">
-        <Link href="/dashboard" aria-label="Dropcue dashboard" className="block h-10 w-[132px] overflow-hidden rounded-md">
+        <Link href="/dashboard" aria-label="Dropcue dashboard" className="block h-10 w-[160px] rounded-md overflow-visible">
           <img
             src="/logo.png"
             alt="Dropcue"
-            className="h-full w-full object-cover object-center"
+            className="h-full w-full object-cover object-center scale-[1.35]"
           />
         </Link>
       </header>

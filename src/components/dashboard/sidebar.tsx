@@ -56,11 +56,11 @@ export function CreatorSidebar() {
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-[260px] bg-paper border-r border-hairline z-40">
       {/* Brand */}
       <div className="flex items-center px-6 h-16 border-b border-hairline">
-        <Link href="/" aria-label="Dropcue home" className="block h-10 w-[132px] overflow-hidden rounded-md">
+        <Link href="/" aria-label="Dropcue home" className="block h-10 w-[160px] rounded-md overflow-visible">
           <img
             src="/logo.png"
             alt="Dropcue"
-            className="h-full w-full object-cover object-center scale-[1.7]"
+            className="h-full w-full object-cover object-center scale-[1.35]"
           />
         </Link>
       </div>
