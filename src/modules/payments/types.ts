@@ -37,6 +37,10 @@ export interface PaymentEvent {
   provider_event_id: string;
   payment_reference: string;
   provider_session_id?: string;
+  /** Bachs charge id (ch_...) from Connect events; ties refunds to orders. */
+  charge_id?: string;
+  /** For refund events: amount actually refunded, in kobo. */
+  refunded_amount?: number;
   amount: Money;
 }
 

@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  getPayoutSetupStatus,
+  startPayoutSetup,
+} from "@/modules/payments/server/connect-actions";
+import type { PayoutSetupStatus } from "@/modules/payments/server/connect";
 
 interface Product {
   id: string;
@@ -169,9 +174,93 @@ function WelcomeState({ userName }: { userName: string }) {
 }
 
 /* ──────────────────────────────────────────────
+   Payout setup — Bachs Connect one-time onboarding
+   ────────────────────────────────────────────── */
+function PayoutSetupBanner({ status }: { status: PayoutSetupStatus }) {
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (status === "active") return null;
+
+  async function handleStart() {
+    setStarting(true);
+    setError(null);
+    try {
+      const result = await startPayoutSetup();
+      if (result.success && result.onboarding_url) {
+        window.location.href = result.onboarding_url;
+        return;
+      }
+      setError(result.error ?? "Payout setup could not be started.");
+    } catch {
+      setError("Payout setup could not be started. Please try again.");
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  const pending = status === "pending";
+  return (
+    <div
+      className={`p-6 rounded-[var(--radius-jumbo)] shadow-soft border flex flex-col sm:flex-row sm:items-center gap-4 ${
+        pending
+          ? "bg-blue-50/60 border-blue-200/60"
+          : "bg-amber-50/60 border-amber-200/60"
+      }`}
+    >
+      <div
+        className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+          pending ? "bg-blue-100" : "bg-amber-100"
+        }`}
+      >
+        <i
+          className={`fa-solid ${pending ? "fa-hourglass-half text-blue-500" : "fa-wallet text-amber-600"}`}
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-semibold">
+          {pending ? "Payout setup in progress" : "One last step: set up payouts"}
+        </h3>
+        <p className="text-xs text-muted mt-0.5 leading-relaxed">
+          {pending
+            ? "Your Bachs account is created. Finish the hosted form to activate payments."
+            : "Buyers can't pay you until this is done. You'll be sent to a secure Bachs page to add your bank account — Dropcue never sees your bank details. You keep 95% — Dropcue fee is 5% per sale."}
+        </p>
+      </div>
+      {error && (
+        <p role="alert" className="text-xs text-red-700 sm:max-w-[220px]">
+          {error}
+        </p>
+      )}
+      <button
+        onClick={handleStart}
+        disabled={starting}
+        className="shrink-0 flex items-center gap-2 bg-ink text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-ink/90 transition-all active:scale-[0.98] disabled:opacity-60"
+      >
+        {starting ? (
+          <i className="fa-solid fa-spinner fa-spin text-xs" />
+        ) : pending ? (
+          <i className="fa-solid fa-arrow-up-right-from-square text-xs" />
+        ) : (
+          <i className="fa-solid fa-arrow-right text-xs" />
+        )}
+        {pending ? "Resume setup" : "Set up payouts"}
+      </button>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────
    Dashboard — Stats, Actions, Orders
    ────────────────────────────────────────────── */
-function DashboardView({ stats, loading }: { stats: DashboardStats; loading: boolean }) {
+function DashboardView({
+  stats,
+  loading,
+  payoutStatus,
+}: {
+  stats: DashboardStats;
+  loading: boolean;
+  payoutStatus: PayoutSetupStatus;
+}) {
   return (
     <div className="flex-1 p-6 lg:p-10 max-w-[1200px] mx-auto w-full flex flex-col gap-10">
       {/* Welcome */}
@@ -236,8 +325,15 @@ function DashboardView({ stats, loading }: { stats: DashboardStats; loading: boo
         </div>
       </div>
 
+      {/* Payout setup (hidden once active) */}
+      <PayoutSetupBanner status={payoutStatus} />
+
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div
+        className={`grid grid-cols-1 gap-4 ${
+          payoutStatus === "active" ? "sm:grid-cols-4" : "sm:grid-cols-3"
+        }`}
+      >
         <Link
           href="/dashboard/products/new"
           className="flex items-center gap-4 p-5 bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline hover:shadow-jumbo hover:border-ink/20 transition-all group"
@@ -274,6 +370,19 @@ function DashboardView({ stats, loading }: { stats: DashboardStats; loading: boo
             <p className="text-xs text-muted mt-0.5">Track completed sales</p>
           </div>
         </Link>
+        {payoutStatus === "active" && (
+          <div className="flex items-center gap-4 p-5 bg-green-50/70 rounded-[var(--radius-jumbo)] shadow-soft border border-green-200/60">
+            <div className="w-12 h-12 bg-green-500 text-white rounded-xl flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-circle-check" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium">Payouts active</h3>
+              <p className="text-xs text-muted mt-0.5">
+                Paid straight to your bank · 5% fee
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Recent Orders */}
@@ -363,6 +472,7 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [payoutStatus, setPayoutStatus] = useState<PayoutSetupStatus>("unavailable");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -372,6 +482,11 @@ export default function DashboardPage() {
         if (!user) return;
 
         setUserName(user.email ?? "");
+
+        /* Payout setup status (Bachs Connect) — failure is non-fatal. */
+        getPayoutSetupStatus()
+          .then((state) => setPayoutStatus(state.status))
+          .catch(() => setPayoutStatus("unavailable"));
 
         /* ── Preferred path: ONE round-trip via RPC ──────────────────
            Correct revenue (ALL paid orders) + exact order count. */
@@ -477,7 +592,11 @@ export default function DashboardPage() {
       ) : !hasProducts ? (
         <WelcomeState userName={userName} />
       ) : (
-        <DashboardView stats={stats} loading={loading} />
+        <DashboardView
+          stats={stats}
+          loading={loading}
+          payoutStatus={payoutStatus}
+        />
       )}
     </div>
   );
