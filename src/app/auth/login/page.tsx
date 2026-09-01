@@ -54,7 +54,11 @@ export default function LoginPage() {
 
     if (result.success) {
       if (mode === "signup") {
-        setSuccess("Check your email to confirm your account.");
+        if ((result as { needsEmailConfirmation?: boolean }).needsEmailConfirmation) {
+          setSuccess("Check your email to confirm your account.");
+        } else {
+          window.location.href = "/dashboard";
+        }
         setStatus("idle");
       } else {
         window.location.href = "/dashboard";

@@ -108,7 +108,9 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deletePermanently, setDeletePermanently] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     async function loadProducts() {
@@ -137,14 +139,25 @@ export default function ProductsPage() {
   async function handleDelete() {
     if (!deleteTarget) return;
     setIsDeleting(true);
-    const result = await deleteProduct(deleteTarget.id);
+    setDeleteError("");
+    const result = await deleteProduct(deleteTarget.id, deletePermanently);
     if (result.success) {
-      setProducts((prev) => prev.map((p) =>
-        p.id === deleteTarget.id ? { ...p, status: "archived" } : p
-      ));
+      if (deletePermanently) {
+        // Remove the product from the list entirely
+        setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      } else {
+        setProducts((prev) => prev.map((p) =>
+          p.id === deleteTarget.id ? { ...p, status: "archived" } : p
+        ));
+      }
+      setIsDeleting(false);
+      setDeletePermanently(false);
+      setDeleteTarget(null);
+    } else {
+      // Keep the dialog open and surface why the server refused
+      setIsDeleting(false);
+      setDeleteError(result.error ?? "Could not delete product");
     }
-    setIsDeleting(false);
-    setDeleteTarget(null);
   }
 
   const filtered = filter === "all" ? products : products.filter((p) => p.status === filter);
@@ -229,9 +242,8 @@ export default function ProductsPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {filtered.map((product) => (
-              <Link
+              <div
                 key={product.id}
-                href={`/dashboard/products/${product.id}/edit`}
                 className="group bg-surface p-5 rounded-[var(--radius-jumbo)] shadow-soft border border-hairline hover:shadow-jumbo hover:border-ink/15 transition-all duration-300"
               >
                 <div className="flex items-center gap-4">
@@ -241,7 +253,10 @@ export default function ProductsPage() {
                   </div>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
+                  <Link
+                    href={`/dashboard/products/${product.id}/edit`}
+                    className="flex-1 min-w-0"
+                  >
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-base font-medium truncate">{product.name}</h3>
                       <span
@@ -259,7 +274,7 @@ export default function ProductsPage() {
                     <p className="text-xs text-muted truncate">
                       {product.description || "No description"} · Created {timeAgo(product.created_at)}
                     </p>
-                  </div>
+                    </Link>
 
                   {/* Price + actions */}
                   <div className="flex items-center gap-3 shrink-0">
@@ -270,7 +285,7 @@ export default function ProductsPage() {
                     />
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -285,11 +300,34 @@ export default function ProductsPage() {
               <i className="fa-solid fa-triangle-exclamation text-red-500 text-xl" />
             </div>
             <h3 className="text-lg font-semibold text-center font-[family-name:var(--font-geist)] mb-2">
-              Delete Product?
+              {deletePermanently ? "Permanently Delete?" : "Delete Product?"}
             </h3>
-            <p className="text-sm text-muted text-center mb-6">
-              This will archive <strong>{deleteTarget.name}</strong> and hide it from buyers. Existing orders and download history will be preserved while retained files remain available.
+            <p className="text-sm text-muted text-center mb-4">
+              {deletePermanently
+                ? "This permanently deletes"
+                : "This will archive"} <strong>{deleteTarget.name}</strong>
+              {deletePermanently
+                ? " and all its files. Only available if it has no orders — otherwise the server will refuse to protect payment history."
+                : " and hide it from buyers. Existing orders and download history will be preserved while retained files remain available."}
             </p>
+            <label className="flex items-start gap-2.5 mb-6 px-1 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={deletePermanently}
+                onChange={(e) => setDeletePermanently(e.target.checked)}
+                disabled={isDeleting}
+                className="mt-0.5 h-4 w-4 accent-red-600"
+              />
+              <span className="text-xs text-muted leading-snug">
+                Permanently delete (removes product + files, only for products
+                that have never been sold)
+              </span>
+            </label>
+            {deleteError && (
+              <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert">
+                {deleteError}
+              </p>
+            )}
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
@@ -307,10 +345,10 @@ export default function ProductsPage() {
                 {isDeleting ? (
                   <>
                     <i className="fa-solid fa-spinner fa-spin text-xs" />
-                    Archiving...
+                    {deletePermanently ? "Deleting..." : "Archiving..."}
                   </>
                 ) : (
-                  "Archive"
+                  deletePermanently ? "Delete Forever" : "Archive"
                 )}
               </button>
             </div>

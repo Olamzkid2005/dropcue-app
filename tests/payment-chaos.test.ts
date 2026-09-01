@@ -43,7 +43,10 @@ async function main() {
   console.log(`Payment chaos tests → ${BASE}`);
   for (const c of cases) {
     const result = await send(c);
-    const expected = c.name.includes("invalid") || c.name.includes("stale") ? 401 : c.name.includes("malformed") ? 200 : 200;
+    const expected =
+      c.name.includes("invalid") || c.name.includes("stale") || c.name.includes("malformed")
+        ? 401
+        : 200;
     console.log(`${result.status === expected ? "✓" : "✗"} ${c.name}: HTTP ${result.status} (${result.ms.toFixed(0)}ms)`);
   }
 

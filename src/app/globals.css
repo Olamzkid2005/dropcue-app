@@ -51,6 +51,15 @@
 }
 
 :root {
+  /* Design-token primitives (paper/ink/accent/hairline) — consumed by the
+     @theme colors below and by raw var() usage in component CSS. */
+  --paper: #fbfbfa;
+  --ink: #141416;
+  --muted: #6e6e73;
+  --hairline: #e5e5e0;
+  --accent: #3a30c7;
+  --surface: #ffffff;
+
   --radius: 0.5rem;
   --accent-indigo: #3a30c7;
   --on-surface: #141416;

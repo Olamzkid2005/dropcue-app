@@ -167,7 +167,7 @@ export async function updateProduct(productId: string, input: UpdateProductInput
   return { success: true, error: null, product };
 }
 
-export async function deleteProduct(productId: string) {
+export async function deleteProduct(productId: string, permanent = false) {
   const supabase = await createClient();
 
   const {
@@ -191,6 +191,37 @@ export async function deleteProduct(productId: string) {
 
   // Purchased products remain financial history. Archive by default so
   // existing orders and delivery records keep their product reference.
+  // Permanent deletion is only possible for products with no orders —
+  // enforced by the permanently_delete_product RPC (migration 006).
+  if (permanent) {
+    const { data: deleted, error } = await supabase.rpc(
+      "permanently_delete_product",
+      { p_product_id: productId }
+    );
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    if (!deleted) {
+      return {
+        success: false,
+        error: "Product could not be permanently deleted",
+      };
+    }
+
+    await logAuditEvent("product_deleted", "product", productId, {
+      name: existing.name,
+      requested_action: "permanent_delete",
+    });
+
+    revalidatePath("/");
+    revalidatePath("/products");
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/products");
+
+    return { success: true, error: null };
+  }
+
   const { error } = await supabase
     .from("products")
     .update({ status: "archived" })
@@ -217,6 +248,7 @@ export async function deleteProduct(productId: string) {
   revalidatePath("/");
   revalidatePath("/products");
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/products");
   revalidatePath("/dashboard/products");
 
   return { success: true, error: null };

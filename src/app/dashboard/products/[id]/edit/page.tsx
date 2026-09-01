@@ -197,6 +197,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePermanently, setDeletePermanently] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [publishedProduct, setPublishedProduct] = useState<ProductData | null>(null);
@@ -276,7 +277,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   async function handleDelete() {
     setIsDeleting(true);
-    const result = await deleteProduct(id);
+    const result = await deleteProduct(id, deletePermanently);
     if (result.success) {
       router.push("/dashboard/products");
     } else {
@@ -446,11 +447,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => !isDeleting && setShowDeleteConfirm(false)} />
           <div className="relative bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline p-8 max-w-[400px] w-full animate-zoom-in">
             <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5"><i className="fa-solid fa-triangle-exclamation text-red-500 text-xl" /></div>
-            <h3 className="text-lg font-semibold text-center font-[family-name:var(--font-geist)] mb-2">Delete Product?</h3>
-            <p className="text-sm text-muted text-center mb-6">This will archive <strong>{product.name}</strong> and hide it from buyers. Existing orders and download history will be preserved while retained files remain available.</p>
+            <h3 className="text-lg font-semibold text-center font-[family-name:var(--font-geist)] mb-2">{deletePermanently ? "Permanently Delete?" : "Delete Product?"}</h3>
+            <p className="text-sm text-muted text-center mb-4">{deletePermanently ? "This permanently deletes" : "This will archive"} <strong>{product.name}</strong>{deletePermanently ? " and all its files. Only available if it has no orders — otherwise the server will refuse to protect payment history." : " and hide it from buyers. Existing orders and download history will be preserved while retained files remain available."}</p>
+            <label className="flex items-start gap-2.5 mb-6 px-1 cursor-pointer select-none">
+              <input type="checkbox" checked={deletePermanently} onChange={(e) => setDeletePermanently(e.target.checked)} disabled={isDeleting} className="mt-0.5 h-4 w-4 accent-red-600" />
+              <span className="text-xs text-muted leading-snug">Permanently delete (removes product + files, only for products that have never been sold)</span>
+            </label>
             <div className="flex gap-3">
               <button onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting} className="flex-1 px-4 py-2.5 border border-hairline rounded-xl text-sm font-medium hover:bg-hairline/50 transition-colors disabled:opacity-50">Cancel</button>
-              <button onClick={handleDelete} disabled={isDeleting} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">{isDeleting ? <><i className="fa-solid fa-spinner fa-spin text-xs" />Archiving...</> : "Archive"}</button>
+              <button onClick={handleDelete} disabled={isDeleting} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">{isDeleting ? <><i className="fa-solid fa-spinner fa-spin text-xs" />{deletePermanently ? "Deleting..." : "Archiving..."}</> : deletePermanently ? "Delete Forever" : "Archive"}</button>
             </div>
           </div>
         </div>

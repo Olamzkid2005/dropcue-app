@@ -63,7 +63,7 @@ export default function MarketingLayout({
               href="/auth/login"
               className="text-sm font-medium text-muted hover:text-ink transition-colors"
             >
-              Log in
+              Sign in
             </Link>
             <Link
               href="/auth/login"

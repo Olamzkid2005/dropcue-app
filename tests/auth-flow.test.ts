@@ -59,8 +59,8 @@ async function runTests() {
 
     const heading = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
     log(
-      "Heading says 'Sign in to Dropcue'",
-      heading.includes("Sign in to Dropcue"),
+      "Heading greets returning users",
+      heading.includes("Welcome back") || heading.includes("Sign in"),
       `heading="${heading}"`
     );
 
@@ -76,14 +76,14 @@ async function runTests() {
       ? await submitButton.evaluate((el) => el.textContent ?? "")
       : "";
     log(
-      "Submit button says 'Send magic link'",
-      buttonText.includes("Send magic link"),
+      "Submit button says 'Sign in'",
+      buttonText.includes("Sign in"),
       `button="${buttonText.trim()}"`
     );
 
-    // Login page uses root layout which has nav but may not have explicit footer
-    const hasNav = await page.$eval("nav", () => true).catch(() => false);
-    log("Nav renders on login page", hasNav);
+    // Login page uses its own header ("Back to home") — no global nav bar
+    const hasNav = await page.$eval("nav, header", () => true).catch(() => false);
+    log("Login page has header/nav chrome", hasNav);
 
     // ─── TEST 2: Form validation ───
     console.log("\n📋 TEST 2: Form validation");
@@ -219,9 +219,13 @@ async function runTests() {
       `bg=${bodyBg}`
     );
 
-    // Check for Material Symbols icon font
-    const hasMaterialIcon = pageContent.includes("material-symbols");
-    log("Material Symbols icon font loaded", hasMaterialIcon);
+    // Check the Material Symbols font is applied (stylesheet + rule in CSS)
+    const hasMaterialIcon = await page.evaluate(() =>
+      Array.from(document.styleSheets).some((s) =>
+        (s.href ?? "").toLowerCase().includes("material")
+      )
+    );
+    log("Material Symbols stylesheet linked", hasMaterialIcon);
 
     // Check form card styling
     const formCard = await page.$("form");

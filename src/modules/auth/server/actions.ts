@@ -13,7 +13,7 @@ export async function signUp(email: string, password: string) {
     return { success: false, error: NOT_CONFIGURED_MSG };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -25,7 +25,13 @@ export async function signUp(email: string, password: string) {
     return { success: false, error: error.message };
   }
 
-  return { success: true, error: null };
+  // Email confirmation is enabled: no session is issued until the user
+  // clicks the confirmation link.
+  if (data.user && !data.session) {
+    return { success: true, needsEmailConfirmation: true, error: null };
+  }
+
+  return { success: true, needsEmailConfirmation: false, error: null };
 }
 
 export async function signIn(email: string, password: string) {
