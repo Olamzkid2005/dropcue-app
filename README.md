@@ -44,7 +44,7 @@ npm install
 2. Go to **Developer Portal → API Keys** and create a secret key
 3. Go to **Webhooks** and add an endpoint:
    - URL: `https://your-domain.com/api/webhooks/bachs`
-   - Events: `collection.succeeded`
+   - Events: `collection.succeeded`, `checkout.completed`, and the relevant `refund.*` events (including `refund.paid`)
 4. Copy the signing secret
 
 ### 4. Set up Resend (email)
@@ -165,7 +165,7 @@ src/
 - **RLS** — Database-level authorization, never trust the browser
 - **Signed URLs** — File downloads use 10-minute expiring URLs
 - **Idempotent webhooks** — Duplicate payments are impossible
-- **Rate limiting** — All API endpoints are rate-limited
+- **Rate limiting** — All API endpoints are rate-limited; production deployments must use distributed storage rather than the local in-memory limiter
 - **Audit logging** — Every important event is tracked
 
 ## Available Scripts

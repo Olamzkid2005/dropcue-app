@@ -64,6 +64,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
 - [ ] Confirm server-only secrets are not prefixed with `NEXT_PUBLIC_`.
 - [ ] Confirm the production domain is used instead of `localhost`.
+- [ ] Configure distributed rate limiting for Vercel before enabling live checkout; the current in-memory limiter is not sufficient across serverless instances.
 - [ ] Deploy the intended commit.
 - [ ] If a stale build is suspected, redeploy with the build cache disabled once.
 
@@ -91,7 +92,9 @@ In Supabase **Authentication → URL Configuration**:
 https://<production-domain>/api/webhooks/bachs
 ```
 
-- [ ] Enable the successful collection event used by the app: `collection.succeeded`.
+- [ ] Enable `collection.succeeded` for legacy/platform-level payments.
+- [ ] Enable `checkout.completed` for Bachs Connect direct charges.
+- [ ] Enable the relevant `refund.*` events, including `refund.paid` for settled refunds.
 - [ ] Confirm the webhook source and signing-secret configuration match.
 - [ ] Confirm the provider return URL uses the production app URL.
 - [ ] Complete one small sandbox transaction before switching to live mode.
@@ -145,10 +148,11 @@ Expected result: HTTP `200` with healthy Supabase, webhook-secret, and app-URL c
 
 ## 8. Observability and support
 
-- [ ] Configure alerts for 5xx responses on:
+- [ ] Configure alerts in Vercel or the chosen monitoring provider for 5xx responses on:
   - [ ] `/api/checkout/*`
   - [ ] `/api/webhooks/bachs`
   - [ ] `/api/webhooks/stripe`
+- [ ] Confirm an alert test reaches the responsible owner.
 - [ ] Confirm application logs are accessible to the owner.
 - [ ] Confirm payment event IDs, order IDs, provider references, and timestamps are retained in incident records.
 - [ ] Never record payment credentials, passwords, or secret keys in logs.

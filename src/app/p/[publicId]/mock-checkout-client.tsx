@@ -49,8 +49,9 @@ export function MockCheckoutClient({
         return;
       }
 
-      // If no checkout_url (e.g. provider not configured), show success
-      setStatus("success");
+      // Never claim payment succeeded without a provider checkout URL.
+      setStatus("error");
+      setError("Payment checkout is temporarily unavailable. Please try again later.");
     } catch {
       setStatus("error");
       setError("Network error. Please try again.");
