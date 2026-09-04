@@ -200,11 +200,20 @@ async function handleRefundEvent(event: NonNullable<
   }
 
   if (!bachsAccountId) {
-    await admin
+    const { error: recordError } = await admin
       .from("payment_events")
       .update({ event_type: "refund.no_account" })
       .eq("provider", "bachs")
       .eq("provider_event_id", event.provider_event_id);
+    if (recordError) {
+      await admin
+        .from("payment_events")
+        .delete()
+        .eq("provider", "bachs")
+        .eq("provider_event_id", event.provider_event_id)
+        .eq("event_type", "refund.processing");
+      throw recordError;
+    }
     return Response.json({ received: true });
   }
   try {
