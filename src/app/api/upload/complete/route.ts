@@ -5,7 +5,7 @@ import { handleApiError } from "@/lib/errors";
 import { rateLimit } from "@/lib/security/api-rate-limit";
 
 export async function POST(request: NextRequest) {
-  const rateLimited = rateLimit(request, "upload");
+  const rateLimited = await rateLimit(request, "upload");
   if (rateLimited) return rateLimited;
 
   try {

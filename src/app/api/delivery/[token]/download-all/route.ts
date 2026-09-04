@@ -7,7 +7,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
-  const rateLimited = rateLimit(request, "download");
+  const rateLimited = await rateLimit(request, "download");
   if (rateLimited) return rateLimited;
 
   try {

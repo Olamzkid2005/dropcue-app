@@ -12,7 +12,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ fileId: string }> }
 ) {
-  const rateLimited = rateLimit(_request, "api");
+  const rateLimited = await rateLimit(_request, "api");
   if (rateLimited) return rateLimited;
 
   try {

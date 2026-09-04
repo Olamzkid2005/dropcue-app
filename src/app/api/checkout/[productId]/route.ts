@@ -22,7 +22,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
-  const rateLimited = rateLimit(request, "checkout");
+  const rateLimited = await rateLimit(request, "checkout");
   if (rateLimited) return rateLimited;
 
   try {

@@ -7,7 +7,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ orderId: string }> }
 ) {
-  const rateLimited = rateLimit(request, "api");
+  const rateLimited = await rateLimit(request, "api");
   if (rateLimited) return rateLimited;
 
   try {
