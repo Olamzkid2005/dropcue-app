@@ -6,9 +6,6 @@ import puppeteer, { Browser, Page } from "puppeteer-core";
 
 const BASE_URL = "http://127.0.0.1:3000";
 
-async function waitForNavigationResponse(page: Page, url: string, waitUntil: "domcontentloaded" | "networkidle2" = "domcontentloaded") {
-  return page.goto(url, { waitUntil, timeout: 30000 });
-}
 const CHROME_PATH =
   process.env.PUPPETEER_EXECUTABLE_PATH ??
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -61,19 +58,16 @@ async function run() {
     console.log("\n=== 1. MARKETING HOMEPAGE ===");
     await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle2", timeout: 30000 });
     const homeTitle = await page.title();
-    homeTitle.includes("Dropcue")
-      ? log("Homepage title contains Dropcue", "PASS", homeTitle)
-      : log("Homepage title contains Dropcue", "FAIL", homeTitle);
+    if (homeTitle.includes("Dropcue")) log("Homepage title contains Dropcue", "PASS", homeTitle);
+    else log("Homepage title contains Dropcue", "FAIL", homeTitle);
 
     const heroText = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
-    heroText.includes("Upload") || heroText.includes("Price")
-      ? log("Homepage hero text present", "PASS", heroText.slice(0, 60))
-      : log("Homepage hero text present", "FAIL", heroText.slice(0, 60));
+    if (heroText.includes("Upload") || heroText.includes("Price")) log("Homepage hero text present", "PASS", heroText.slice(0, 60));
+    else log("Homepage hero text present", "FAIL", heroText.slice(0, 60));
 
     const ctaButtons = await page.$$('a[href="/auth/login"]');
-    ctaButtons.length > 0
-      ? log("Homepage has Sign Up CTAs", "PASS", `${ctaButtons.length} CTA links`)
-      : log("Homepage has Sign Up CTAs", "FAIL", "No CTA links found");
+    if (ctaButtons.length > 0) log("Homepage has Sign Up CTAs", "PASS", `${ctaButtons.length} CTA links`);
+    else log("Homepage has Sign Up CTAs", "FAIL", "No CTA links found");
 
     await page.screenshot({ path: "tests/screenshots/full-01-homepage.png", fullPage: false });
 
@@ -81,14 +75,12 @@ async function run() {
     console.log("\n=== 2. HOW IT WORKS ===");
     await page.goto(`${BASE_URL}/how-it-works`, { waitUntil: "networkidle2", timeout: 30000 });
     const howTitle = await page.title();
-    howTitle.includes("Dropcue")
-      ? log("How it works page loads", "PASS")
-      : log("How it works page loads", "FAIL", howTitle);
+    if (howTitle.includes("Dropcue")) log("How it works page loads", "PASS");
+    else log("How it works page loads", "FAIL", howTitle);
 
     const steps = await page.$$eval("h2", (els) => els.map((e) => e.textContent ?? ""));
-    steps.some((s) => s.includes("Upload") || s.includes("file"))
-      ? log("How it works has step content", "PASS", `${steps.length} headings`)
-      : log("How it works has step content", "FAIL", `Headings: ${steps.join(", ")}`);
+    if (steps.some((s) => s.includes("Upload") || s.includes("file"))) log("How it works has step content", "PASS", `${steps.length} headings`);
+    else log("How it works has step content", "FAIL", `Headings: ${steps.join(", ")}`);
 
     await page.screenshot({ path: "tests/screenshots/full-02-how-it-works.png", fullPage: false });
 
@@ -96,11 +88,9 @@ async function run() {
     console.log("\n=== 3. PRICING ===");
     await page.goto(`${BASE_URL}/pricing`, { waitUntil: "networkidle2", timeout: 30000 });
     const pricingText = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
-    pricingText.includes("Pricing") || pricingText.includes("Free") || pricingText.includes("start")
-      ? log("Pricing page loads with headline", "PASS", pricingText.slice(0, 50))
-      : log("Pricing page loads with headline", "FAIL", pricingText);
+    if (pricingText.includes("Pricing") || pricingText.includes("Free") || pricingText.includes("start")) log("Pricing page loads with headline", "PASS", pricingText.slice(0, 50));
+    else log("Pricing page loads with headline", "FAIL", pricingText);
 
-    const planCards = await page.$$('text/Starter');
     log("Pricing page has plan cards", "PASS", "Starter and Pro plans visible");
 
     await page.screenshot({ path: "tests/screenshots/full-03-pricing.png", fullPage: false });
@@ -109,9 +99,8 @@ async function run() {
     console.log("\n=== 4. SECURITY ===");
     await page.goto(`${BASE_URL}/security`, { waitUntil: "networkidle2", timeout: 30000 });
     const secText = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
-    secText.includes("protect") || secText.includes("Secure")
-      ? log("Security page loads", "PASS", secText.slice(0, 50))
-      : log("Security page loads", "FAIL", secText);
+    if (secText.includes("protect") || secText.includes("Secure")) log("Security page loads", "PASS", secText.slice(0, 50));
+    else log("Security page loads", "FAIL", secText);
 
     await page.screenshot({ path: "tests/screenshots/full-04-security.png", fullPage: false });
 
@@ -119,24 +108,20 @@ async function run() {
     console.log("\n=== 5. LOGIN PAGE ===");
     await page.goto(`${BASE_URL}/auth/login`, { waitUntil: "networkidle2", timeout: 30000 });
     const loginTitle = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
-    loginTitle.includes("Welcome") || loginTitle.includes("Sign")
-      ? log("Login page headline present", "PASS", loginTitle)
-      : log("Login page headline present", "FAIL", loginTitle);
+    if (loginTitle.includes("Welcome") || loginTitle.includes("Sign")) log("Login page headline present", "PASS", loginTitle);
+    else log("Login page headline present", "FAIL", loginTitle);
 
     const emailInput = await page.$('input[type="email"]');
-    emailInput
-      ? log("Email input present", "PASS")
-      : log("Email input present", "FAIL");
+    if (emailInput) log("Email input present", "PASS");
+    else log("Email input present", "FAIL");
 
     const passwordInput = await page.$('input[type="password"]');
-    passwordInput
-      ? log("Password input present", "PASS")
-      : log("Password input present", "FAIL");
+    if (passwordInput) log("Password input present", "PASS");
+    else log("Password input present", "FAIL");
 
     const googleBtn = await page.$eval("button", (el) => el.textContent ?? "").catch(() => "");
-    googleBtn.includes("Google")
-      ? log("Google OAuth button present", "PASS")
-      : log("Google OAuth button present", "FAIL", googleBtn.slice(0, 40));
+    if (googleBtn.includes("Google")) log("Google OAuth button present", "PASS");
+    else log("Google OAuth button present", "FAIL", googleBtn.slice(0, 40));
 
     await page.screenshot({ path: "tests/screenshots/full-05-login.png", fullPage: false });
 
@@ -144,9 +129,8 @@ async function run() {
     console.log("\n=== 6. DASHBOARD (auth guard) ===");
     await page.goto(`${BASE_URL}/dashboard`, { waitUntil: "networkidle2", timeout: 30000 });
     const dashUrl = page.url();
-    dashUrl.includes("/auth/login")
-      ? log("Dashboard redirects to login (unauthenticated)", "PASS", dashUrl)
-      : log("Dashboard redirects to login", "FAIL", dashUrl);
+    if (dashUrl.includes("/auth/login")) log("Dashboard redirects to login (unauthenticated)", "PASS", dashUrl);
+    else log("Dashboard redirects to login", "FAIL", dashUrl);
 
     await page.screenshot({ path: "tests/screenshots/full-06-dashboard-guard.png", fullPage: false });
 
@@ -154,9 +138,8 @@ async function run() {
     console.log("\n=== 7. CREATE PRODUCT (auth guard) ===");
     await page.goto(`${BASE_URL}/products/new`, { waitUntil: "networkidle2", timeout: 30000 });
     const prodUrl = page.url();
-    prodUrl.includes("/auth/login")
-      ? log("Products/new redirects to login (unauthenticated)", "PASS")
-      : log("Products/new redirects to login", "FAIL", prodUrl);
+    if (prodUrl.includes("/auth/login")) log("Products/new redirects to login (unauthenticated)", "PASS");
+    else log("Products/new redirects to login", "FAIL", prodUrl);
 
     await page.screenshot({ path: "tests/screenshots/full-07-create-product-guard.png", fullPage: false });
 
@@ -183,9 +166,8 @@ async function run() {
     console.log("\n=== 9. NONEXISTENT PRODUCT ===");
     const resp404 = await fetch(`${BASE_URL}/p/does-not-exist`);
     const status404 = resp404.status;
-    status404 === 404
-      ? log("Nonexistent product returns 404", "PASS")
-      : log("Nonexistent product returns 404", "FAIL", `Status: ${status404}`);
+    if (status404 === 404) log("Nonexistent product returns 404", "PASS");
+    else log("Nonexistent product returns 404", "FAIL", `Status: ${status404}`);
 
     await page.screenshot({ path: "tests/screenshots/full-09-not-found.png", fullPage: false });
 
@@ -197,9 +179,8 @@ async function run() {
       body: JSON.stringify({ buyer_email: "test@example.com", payment_provider: "bachs" }),
     });
     const checkoutResp = { status: checkoutHttpResp.status, body: await checkoutHttpResp.json() };
-    checkoutResp.status === 404 || checkoutResp.status === 400
-      ? log("Checkout API returns error for fake product", "PASS", `Status: ${checkoutResp.status}`)
-      : log("Checkout API returns error for fake product", "FAIL", `Status: ${checkoutResp.status}`);
+    if (checkoutResp.status === 404 || checkoutResp.status === 400) log("Checkout API returns error for fake product", "PASS", `Status: ${checkoutResp.status}`);
+    else log("Checkout API returns error for fake product", "FAIL", `Status: ${checkoutResp.status}`);
 
     // ─── 11. DOWNLOAD PAGE (invalid token) ───
     console.log("\n=== 11. DOWNLOAD PAGE ===");
@@ -209,9 +190,8 @@ async function run() {
     const dlText = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
     const dlBodyText = await page.evaluate(() => document.body.innerText).catch(() => "");
     const dlHasError = dlText.includes("Not Found") || dlText.includes("Invalid") || dlText.includes("expired") || dlText.includes("Loading") || dlBodyText.includes("Loading") || dlBodyText.includes("no longer available") || dlBodyText.includes("files are no longer") || dlText.length > 0;
-    dlHasError
-      ? log("Download page renders (loading/invalid state)", "PASS", dlText.slice(0, 40) || dlBodyText.slice(0, 40))
-      : log("Download page renders", "FAIL", dlText.slice(0, 40));
+    if (dlHasError) log("Download page renders (loading/invalid state)", "PASS", dlText.slice(0, 40) || dlBodyText.slice(0, 40));
+    else log("Download page renders", "FAIL", dlText.slice(0, 40));
 
     await page.screenshot({ path: "tests/screenshots/full-10-download-invalid.png", fullPage: false });
 
@@ -219,16 +199,14 @@ async function run() {
     console.log("\n=== 12. PAYMENT SUCCESS ===");
     await page.goto(`${BASE_URL}/payment/success?order_id=fake-order-id`, { waitUntil: "networkidle2", timeout: 30000 });
     const payText = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
-    payText.includes("Invalid") || payText.includes("Failed") || payText.includes("Confirming")
-      ? log("Payment success page renders", "PASS", payText.slice(0, 40))
-      : log("Payment success page renders", "FAIL", payText.slice(0, 40));
+    if (payText.includes("Invalid") || payText.includes("Failed") || payText.includes("Confirming")) log("Payment success page renders", "PASS", payText.slice(0, 40));
+    else log("Payment success page renders", "FAIL", payText.slice(0, 40));
 
     // Without order_id
     await page.goto(`${BASE_URL}/payment/success`, { waitUntil: "networkidle2", timeout: 30000 });
     const noOrderText = await page.$eval("h1", (el) => el.textContent ?? "").catch(() => "");
-    noOrderText.includes("Invalid")
-      ? log("Payment success shows error without order_id", "PASS")
-      : log("Payment success shows error without order_id", "FAIL", noOrderText.slice(0, 40));
+    if (noOrderText.includes("Invalid")) log("Payment success shows error without order_id", "PASS");
+    else log("Payment success shows error without order_id", "FAIL", noOrderText.slice(0, 40));
 
     await page.screenshot({ path: "tests/screenshots/full-11-payment-success.png", fullPage: false });
 
@@ -240,18 +218,16 @@ async function run() {
     log("Body background set", "PASS", bodyBg);
 
     const fontFamily = await page.$eval("body", (el) => getComputedStyle(el).fontFamily);
-    fontFamily.includes("Inter") || fontFamily.includes("system-ui")
-      ? log("Inter/system font applied", "PASS", fontFamily.slice(0, 40))
-      : log("Inter/system font applied", "FAIL", fontFamily.slice(0, 40));
+    if (fontFamily.includes("Inter") || fontFamily.includes("system-ui")) log("Inter/system font applied", "PASS", fontFamily.slice(0, 40));
+    else log("Inter/system font applied", "FAIL", fontFamily.slice(0, 40));
 
     await page.screenshot({ path: "tests/screenshots/full-12-design-system.png", fullPage: false });
 
     // ─── 14. FEEDBACK BUTTON ───
     console.log("\n=== 14. FEEDBACK BUTTON ===");
     const feedbackBtn = await page.$('[class*="fixed"][class*="bottom"]');
-    feedbackBtn
-      ? log("Feedback button present on page", "PASS")
-      : log("Feedback button present on page", "FAIL", "Not found in bottom corner");
+    if (feedbackBtn) log("Feedback button present on page", "PASS");
+    else log("Feedback button present on page", "FAIL", "Not found in bottom corner");
 
     // ─── 15. MOBILE RESPONSIVENESS ───
     console.log("\n=== 15. MOBILE RESPONSIVENESS ===");
@@ -261,17 +237,15 @@ async function run() {
     const overflowX = await page.$eval("html", (el) => {
       return el.scrollWidth > el.clientWidth + 5;
     });
-    !overflowX
-      ? log("Homepage: no horizontal overflow on mobile", "PASS")
-      : log("Homepage: no horizontal overflow on mobile", "FAIL", "Page scrolls horizontally");
+    if (!overflowX) log("Homepage: no horizontal overflow on mobile", "PASS");
+    else log("Homepage: no horizontal overflow on mobile", "FAIL", "Page scrolls horizontally");
 
     await page.screenshot({ path: "tests/screenshots/full-13-mobile.png", fullPage: false });
 
     await page.goto(`${BASE_URL}/auth/login`, { waitUntil: "networkidle2", timeout: 30000 });
     const loginOverflow = await page.$eval("body", (el) => el.scrollWidth > window.innerWidth);
-    !loginOverflow
-      ? log("Login page: no overflow on mobile", "PASS")
-      : log("Login page: no overflow on mobile", "FAIL", "Page scrolls horizontally");
+    if (!loginOverflow) log("Login page: no overflow on mobile", "PASS");
+    else log("Login page: no overflow on mobile", "FAIL", "Page scrolls horizontally");
 
     await page.screenshot({ path: "tests/screenshots/full-14-mobile-login.png", fullPage: false });
 
@@ -281,14 +255,12 @@ async function run() {
     await page.goto(`${BASE_URL}/`, { waitUntil: "networkidle2", timeout: 30000 });
 
     const navLinks = await page.$$eval("nav a", (els) => els.map((e) => e.textContent?.trim() ?? ""));
-    navLinks.length > 0
-      ? log("Marketing nav has links", "PASS", navLinks.filter(Boolean).join(", "))
-      : log("Marketing nav has links", "FAIL", "No nav links found");
+    if (navLinks.length > 0) log("Marketing nav has links", "PASS", navLinks.filter(Boolean).join(", "));
+    else log("Marketing nav has links", "FAIL", "No nav links found");
 
     const footerLinks = await page.$$eval("footer a", (els) => els.map((e) => e.textContent?.trim() ?? ""));
-    footerLinks.length > 0
-      ? log("Footer has links", "PASS", footerLinks.filter(Boolean).join(", "))
-      : log("Footer has links", "FAIL", "No footer links found");
+    if (footerLinks.length > 0) log("Footer has links", "PASS", footerLinks.filter(Boolean).join(", "));
+    else log("Footer has links", "FAIL", "No footer links found");
 
   } catch (err) {
     console.error("Test error:", err);

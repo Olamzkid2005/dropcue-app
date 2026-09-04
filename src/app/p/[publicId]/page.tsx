@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getPublicProduct}
  from "@/modules/products/server/actions";
@@ -5,6 +6,7 @@ import { formatDisplayPrice, createMoney}
  from "@/lib/money/types";
 import { CheckoutForm}
  from "@/components/checkout/checkout-form";
+import { Logo } from "@/components/logo";
 
 interface Props {
   params: Promise<{ publicId: string}
@@ -51,11 +53,7 @@ export default async function PublicProductPage({ params}
       {/* Header */}
       <header className="w-full h-16 bg-white border-b border-gray-200 flex items-center px-6 md:px-16 shrink-0 sticky top-0 z-50">
         <div className="max-w-[1120px] mx-auto w-full flex justify-center md:justify-start">
-          <img
-            src="/logo.png"
-            alt="Dropcue"
-            className="h-12 w-auto"
-          />
+          <Logo className="h-12 w-auto" />
         </div>
       </header>
 
@@ -68,9 +66,11 @@ export default async function PublicProductPage({ params}
               {/* Cover Art */}
               <div className="relative w-full aspect-square md:aspect-[4/3] rounded-xl overflow-hidden bg-white border border-gray-200 shadow-sm">
                 {product.cover_image_url ? (
-                  <img
+                  <Image
                     src={product.cover_image_url}
                     alt={product.name}
+                    fill
+                    sizes="(min-width: 768px) 560px, 100vw"
                     className="w-full h-full object-cover"
                   />
                 ) : (

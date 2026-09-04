@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 
 export function ComparisonSlider() {
   const [sliderPos, setSliderPos] = useState(50);
@@ -67,9 +68,11 @@ export function ComparisonSlider() {
       onTouchStart={handleTouchStart}
     >
       {/* Buyer View (Background - full width) */}
-      <img
+      <Image
         src="/buyer-view.png"
         alt="Buyer checkout view"
+        width={828}
+        height={460}
         className="absolute inset-0 w-full h-full object-cover"
         draggable={false}
       />
@@ -79,9 +82,11 @@ export function ComparisonSlider() {
         className="absolute inset-0 overflow-hidden"
         style={{ width: `${sliderPos}%` }}
       >
-        <img
+        <Image
           src="/creator-view.png"
           alt="Creator dashboard view"
+          width={821}
+          height={579}
           className="absolute inset-0 h-full object-cover"
           style={{ width: `${containerWidth}px` }}
           draggable={false}

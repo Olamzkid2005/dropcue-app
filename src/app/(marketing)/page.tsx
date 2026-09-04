@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ProductDemo } from "@/components/landing/product-demo";
 import { CheckoutDemo } from "@/components/landing/checkout-demo";
 import { DashboardDemo } from "@/components/landing/dashboard-demo";
@@ -150,7 +151,7 @@ export default function MarketingHomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             <a href="#" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
-                <img
+                <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   src="/marketing/creator-music.jpg"
                   alt="music producer working at a laptop in a dim studio, headphones around neck, moody cinematic lighting"
@@ -172,7 +173,7 @@ export default function MarketingHomePage() {
             </a>
             <a href="#" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
-                <img
+                <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   src="/marketing/creator-photo.jpg"
                   alt="photographer reviewing portfolio on a tablet in a bright minimalist workspace, natural light"
@@ -194,7 +195,7 @@ export default function MarketingHomePage() {
             </a>
             <a href="#" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
-                <img
+                <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   src="/marketing/creator-design.jpg"
                   alt="graphic designer sketching on a tablet at a clean desk, modern interior, soft daylight"
@@ -216,7 +217,7 @@ export default function MarketingHomePage() {
             </a>
             <a href="#" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
-                <img
+                <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   src="/marketing/creator-video.jpg"
                   alt="video editor at a dual-monitor editing suite, focused expression, dark cinematic room"
@@ -238,7 +239,7 @@ export default function MarketingHomePage() {
             </a>
             <a href="#" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
-                <img
+                <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   src="/marketing/creator-course.jpg"
                   alt="online course creator recording a lesson on a phone tripod in a cozy home office, warm tones"
@@ -260,7 +261,7 @@ export default function MarketingHomePage() {
             </a>
             <a href="#" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
-                <img
+                <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   src="/marketing/creator-writer.jpg"
                   alt="writer typing on a laptop beside a notebook and coffee in a sunlit room, calm atmosphere"
@@ -290,7 +291,7 @@ export default function MarketingHomePage() {
           <div className="relative group">
             <div className="absolute -inset-4 bg-accent/5 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden">
-              <img
+              <Image
                 className="w-full"
                 src="/marketing/showcase-ui.jpg"
                 alt="clean minimal web app dashboard UI mockup of a digital storefront showing product listings, sales stats"
@@ -301,7 +302,7 @@ export default function MarketingHomePage() {
               />
             </div>
             <div className="absolute -bottom-6 -right-6 w-48 aspect-video bg-surface rounded-2xl shadow-jumbo border border-hairline p-3 hidden lg:block">
-              <img
+              <Image
                 className="w-full h-full object-cover rounded-xl"
                 src="/marketing/showcase-device.jpg"
                 alt="sleek compact digital drive device product render without background, soft studio lighting"

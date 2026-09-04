@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Logo } from "@/components/logo";
 import {
   signIn,
   signUp,
@@ -10,6 +12,7 @@ import {
 } from "@/modules/auth/server/actions";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,11 +60,11 @@ export default function LoginPage() {
         if ((result as { needsEmailConfirmation?: boolean }).needsEmailConfirmation) {
           setSuccess("Check your email to confirm your account.");
         } else {
-          window.location.href = "/dashboard";
+          router.push("/dashboard");
         }
         setStatus("idle");
       } else {
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
       }
     } else {
       setStatus("error");
@@ -78,7 +81,7 @@ export default function LoginPage() {
     const result = await fn();
 
     if (result.success && result.url) {
-      window.location.href = result.url;
+      window.location.href = result.url; // external OAuth URL — full navigation required
     } else {
       setError(result.error ?? `Could not start ${provider} sign-in`);
       setOauthLoading(null);
@@ -94,11 +97,7 @@ export default function LoginPage() {
             href="/"
             className="flex items-center"
           >
-            <img
-              src="/logo.png"
-              alt="Dropcue"
-              className="h-12 w-auto"
-            />
+            <Logo className="h-12 w-auto" />
           </Link>
           <Link
             href="/"

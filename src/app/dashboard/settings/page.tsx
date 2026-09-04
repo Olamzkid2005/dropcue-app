@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -14,6 +15,7 @@ function formatDate(value?: string | null) {
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
@@ -28,7 +30,7 @@ export default function SettingsPage() {
   async function handleSignOut() {
     setSigningOut(true);
     await createClient().auth.signOut();
-    window.location.href = "/";
+    router.push("/");
   }
 
   const email = user?.email ?? "—";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { updateProduct, deleteProduct } from "@/modules/products/server/actions";
@@ -82,9 +83,14 @@ function PublishedConfirmation({
 
         <section className="p-6 lg:p-8 bg-paper/50">
           <div className="bg-surface border border-hairline rounded-xl p-4 flex items-center gap-4 shadow-soft mb-7">
-            <div className="w-24 h-24 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 overflow-hidden">
-              {product.cover_image_url ? (
-                <img src={product.cover_image_url} alt="" className="h-full w-full object-cover" />
+            <div className="w-24 h-24 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0 overflow-hidden">                {product.cover_image_url ? (
+                  <Image
+                    src={product.cover_image_url}
+                    alt=""
+                    fill
+                    sizes="96px"
+                    className="h-full w-full object-cover"
+                  />
               ) : (
                 <i className="fa-solid fa-box-open text-2xl text-accent" aria-hidden="true" />
               )}

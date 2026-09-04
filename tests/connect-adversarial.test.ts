@@ -52,7 +52,6 @@ function check(name: string, ok: boolean, detail = "") {
 }
 
 const orderIds: string[] = [];
-const chargeIds: string[] = [];
 
 function completedEvent(opts: {
   eventId: string;

@@ -1,7 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleHelp,
+  ExternalLink,
+  FileUp,
+  LayoutDashboard,
+  ShieldCheck,
+  WalletCards,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
   getPayoutSetupStatus,
@@ -78,96 +90,303 @@ function timeAgo(dateStr: string): string {
 /* ──────────────────────────────────────────────
    Empty State — Welcome / Onboarding
    ────────────────────────────────────────────── */
-function WelcomeState({ userName }: { userName: string }) {
-  const steps = [
+function WelcomeState({
+  userName,
+  payoutStatus,
+}: {
+  userName: string;
+  payoutStatus: PayoutSetupStatus;
+}) {
+  const [guideOpen, setGuideOpen] = useState<boolean | null>(null);
+  const [step, setStep] = useState(0);
+  const [payoutStarting, setPayoutStarting] = useState(false);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
+  const onboardingStorageKey = `dropcue:onboarding-complete:${userName || "account"}`;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setGuideOpen(window.localStorage.getItem(onboardingStorageKey) !== "true");
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [onboardingStorageKey]);
+
+  function closeGuide() {
+    window.localStorage.setItem(onboardingStorageKey, "true");
+    setGuideOpen(false);
+  }
+
+  function finishGuide() {
+    closeGuide();
+  }
+
+  async function handlePayoutSetup() {
+    setPayoutStarting(true);
+    setPayoutError(null);
+    try {
+      const result = await startPayoutSetup();
+      if (result.success && result.onboarding_url) {
+        window.location.href = result.onboarding_url;
+        return;
+      }
+      setPayoutError(result.error ?? "Payout setup could not be started.");
+    } catch {
+      setPayoutError("Payout setup could not be started. Please try again.");
+    } finally {
+      setPayoutStarting(false);
+    }
+  }
+
+  const guideSteps = [
     {
-      icon: "fa-solid fa-cloud-arrow-up",
-      title: "Upload your file",
-      desc: "Drag and drop audio, video, PDFs — we handle hosting and delivery.",
+      eyebrow: "Start here",
+      title: "Turn your work into a simple buying experience.",
+      description:
+        "Dropcue gives you one place to publish a digital product, collect payment, and deliver the file securely after a purchase.",
+      icon: LayoutDashboard,
+      accent: "bg-[#eeecff] text-accent",
+      details: [
+        "Create a product page in a few minutes",
+        "Share one public link anywhere",
+        "See sales and delivery activity in your dashboard",
+      ],
     },
     {
-      icon: "fa-solid fa-tag",
-      title: "Set your price",
-      desc: "Choose a fixed price in Naira. You control everything.",
+      eyebrow: "Before your first sale",
+      title: "Set up where your earnings should go.",
+      description:
+        "Payout setup is a one-time step. Bachs securely collects your bank details, while Dropcue only receives the payout status needed to let buyers pay you.",
+      icon: WalletCards,
+      accent: "bg-[#fff5dc] text-[#9a6500]",
+      details: [
+        "Your bank details stay with Bachs",
+        "Buyers cannot pay until payouts are active",
+        "Dropcue keeps a 5% platform fee per sale",
+      ],
     },
     {
-      icon: "fa-solid fa-share-nodes",
-      title: "Share one link",
-      desc: "Paste your link anywhere — socials, emails, or your bio.",
+      eyebrow: "Build and share",
+      title: "Publish once. Sell from one link.",
+      description:
+        "Add a name, description, price, and digital file. Dropcue creates the product page and gives you a link ready for your audience.",
+      icon: FileUp,
+      accent: "bg-[#e8f7f1] text-[#087a55]",
+      details: [
+        "Upload supported files from the product form",
+        "Review the product before publishing",
+        "Copy the public link to your bio, email, or socials",
+      ],
     },
     {
-      icon: "fa-solid fa-money-bill-wave",
-      title: "Get paid",
-      desc: "Buyers pay, you get notified, and the file ships automatically.",
+      eyebrow: "After someone buys",
+      title: "Delivery happens automatically.",
+      description:
+        "A successful payment creates secure, time-limited download access and sends the buyer their delivery email. You stay in control from the dashboard.",
+      icon: ShieldCheck,
+      accent: "bg-[#e9f1ff] text-[#2563a8]",
+      details: [
+        "Orders appear in your Orders page",
+        "Download access is protected and trackable",
+        "Settings, support, and account controls are always available",
+      ],
     },
   ];
 
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 lg:py-24 max-w-[720px] mx-auto w-full">
-      {/* Hero icon */}
-      <div className="mb-8">
-        <img
-          src="/logo.png"
-          alt="Dropcue"
-          className="w-24 h-24 object-contain drop-shadow-lg"
-        />
-      </div>
+  if (guideOpen === null) {
+    return <div className="flex-1" aria-label="Loading onboarding" />;
+  }
 
-      {/* Heading */}
-      <h1 className="text-3xl lg:text-5xl font-semibold tracking-tight font-[family-name:var(--font-geist)] text-center mb-4">
-        Welcome to Dropcue{userName ? `, ${userName.split("@")[0]}` : ""}
-      </h1>
-      <p className="text-muted text-lg text-center max-w-md mb-10 leading-relaxed">
-        Upload, price, and share your digital products. Track secure delivery in one place.
-      </p>
-
-      {/* Big CTA */}
-      <Link
-        href="/dashboard/products/new"
-        className="group flex items-center gap-3 bg-ink text-white px-8 py-4 rounded-2xl text-base font-medium hover:bg-ink/90 transition-all duration-300 shadow-jumbo hover:shadow-[0_20px_60px_rgba(20,20,22,0.25)] active:scale-[0.97] mb-12"
-      >
-        <i className="fa-solid fa-plus text-sm" />
-        Create Your First Product
-        <i className="fa-solid fa-arrow-right text-sm group-hover:translate-x-1 transition-transform" />
-      </Link>
-
-      {/* How it works */}
-      <div className="w-full">
-        <p className="text-xs uppercase tracking-widest text-muted font-semibold text-center mb-8">
-          How it works
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {steps.map((step, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-4 p-5 bg-surface rounded-2xl border border-hairline shadow-soft"
+  if (!guideOpen) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6 py-16">
+        <div className="w-full max-w-[680px] bg-surface border border-hairline rounded-[var(--radius-jumbo)] shadow-soft p-8 lg:p-10 text-center animate-fade-in">
+          <div className="mx-auto mb-6 w-14 h-14 rounded-2xl bg-[#eeecff] text-accent flex items-center justify-center">
+            <Check size={25} strokeWidth={2.5} />
+          </div>
+          <p className="text-xs uppercase tracking-[0.18em] text-accent font-semibold mb-3">You&apos;re ready</p>
+          <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight font-[family-name:var(--font-geist)] mb-3">
+            Welcome to Dropcue{userName ? `, ${userName.split("@")[0]}` : ""}.
+          </h1>
+          <p className="text-muted max-w-md mx-auto leading-relaxed mb-8">
+            Your workspace is ready. Create your first product and Dropcue will guide buyers from payment to secure delivery.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/dashboard/products/new"
+              className="inline-flex items-center justify-center gap-2 bg-ink text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-ink/90 transition-all active:scale-[0.98]"
             >
-              <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center shrink-0">
-                <i className={`${step.icon} text-accent text-sm`} />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium mb-0.5">{step.title}</h3>
-                <p className="text-xs text-muted leading-relaxed">{step.desc}</p>
-              </div>
-            </div>
-          ))}
+              Create your first product
+              <ArrowRight size={16} />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setGuideOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-muted hover:text-ink hover:bg-hairline/50 transition-colors"
+            >
+              Open the guide
+            </button>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Trust signals */}
-      <div className="flex items-center gap-6 mt-10 text-xs text-muted">
-        <span className="flex items-center gap-1.5">
-          <i className="fa-solid fa-shield-halved text-ink" />
-          Secure delivery
-        </span>
-        <span className="flex items-center gap-1.5">
-          <i className="fa-solid fa-bolt text-ink" />
-          Track completed sales
-        </span>
-        <span className="flex items-center gap-1.5">
-          <i className="fa-solid fa-naira-sign text-ink" />
-          Start with no monthly fee
-        </span>
+  const current = guideSteps[step];
+  const Icon = current.icon;
+  const isPayoutStep = step === 1;
+  const isLastStep = step === guideSteps.length - 1;
+  const payoutLabel =
+    payoutStatus === "active"
+      ? "Active"
+      : payoutStatus === "pending"
+        ? "Setup in progress"
+        : payoutStatus === "unavailable"
+          ? "Temporarily unavailable"
+          : "Not set up";
+  const payoutDescription =
+    payoutStatus === "active"
+      ? "You can accept payments when your product is published."
+      : payoutStatus === "unavailable"
+        ? "Payout status could not be checked right now. You can continue the guide and try again from the dashboard."
+        : "You can create your product first, then finish payouts before sharing it.";
+
+  return (
+    <div className="flex-1 px-5 py-8 sm:px-8 lg:px-12 lg:py-12 animate-fade-in">
+      <div className="w-full max-w-[1040px] mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Logo className="h-9 w-auto object-contain" />
+            <span className="hidden sm:block h-5 w-px bg-hairline" />
+            <span className="hidden sm:block text-sm text-muted">Quick start</span>
+          </div>
+          <button
+            type="button"
+            onClick={closeGuide}
+            className="text-sm font-medium text-muted hover:text-ink transition-colors"
+          >
+            Skip for now
+          </button>
+        </div>
+
+        <div className="grid lg:grid-cols-[250px_1fr] gap-8 lg:gap-14 items-start">
+          <aside className="lg:sticky lg:top-28">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted font-semibold mb-4">Your first day</p>
+            <nav aria-label="Onboarding steps" className="grid grid-cols-4 lg:grid-cols-1 gap-2">
+              {guideSteps.map((item, index) => {
+                const StepIcon = item.icon;
+                const active = index === step;
+                const complete = index < step;
+                return (
+                  <button
+                    key={item.eyebrow}
+                    type="button"
+                    onClick={() => setStep(index)}
+                    aria-current={active ? "step" : undefined}
+                    className={`group flex items-center gap-3 rounded-xl p-2 lg:p-3 text-left transition-colors ${
+                      active ? "bg-surface border border-hairline shadow-soft" : "hover:bg-surface/70"
+                    }`}
+                  >
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${active ? item.accent : "bg-hairline/60 text-muted"}`}>
+                      {complete ? <Check size={16} strokeWidth={2.5} /> : <StepIcon size={16} />}
+                    </span>
+                    <span className="hidden lg:block min-w-0">
+                      <span className={`block text-xs font-semibold ${active ? "text-ink" : "text-muted"}`}>{item.eyebrow}</span>
+                      <span className="block text-[11px] text-muted mt-0.5">Step {index + 1} of {guideSteps.length}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+            <div className="hidden lg:flex items-start gap-2 mt-8 text-xs text-muted leading-5">
+              <CircleHelp size={15} className="shrink-0 mt-0.5" />
+              <p>You can reopen this guide from this page if you skip it.</p>
+            </div>
+          </aside>
+
+          <section className="bg-surface border border-hairline rounded-[var(--radius-jumbo)] shadow-soft overflow-hidden">
+            <div className="h-1 bg-hairline">
+              <div className="h-full bg-accent transition-all duration-500" style={{ width: `${((step + 1) / guideSteps.length) * 100}%` }} />
+            </div>
+            <div className="p-7 sm:p-10 lg:p-14">
+              <div className="flex items-center justify-between gap-4 mb-12">
+                <span className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl ${current.accent}`}>
+                  <Icon size={27} strokeWidth={1.8} />
+                </span>
+                <span className="text-xs font-semibold text-muted">0{step + 1} / 0{guideSteps.length}</span>
+              </div>
+
+              <p className="text-xs uppercase tracking-[0.18em] font-semibold text-accent mb-4">{current.eyebrow}</p>
+              <h1 className="max-w-[620px] text-3xl sm:text-4xl font-semibold tracking-tight leading-[1.12] font-[family-name:var(--font-geist)]">
+                {current.title}
+              </h1>
+              <p className="max-w-[620px] text-base leading-7 text-muted mt-5">
+                {current.description}
+              </p>
+
+              <ul className="grid sm:grid-cols-3 gap-3 mt-9">
+                {current.details.map((detail) => (
+                  <li key={detail} className="flex items-start gap-2 rounded-xl bg-paper border border-hairline p-3 text-xs leading-5 text-ink/80">
+                    <Check size={15} className="text-accent shrink-0 mt-0.5" />
+                    {detail}
+                  </li>
+                ))}
+              </ul>
+
+              {isPayoutStep && (
+                <div className="mt-8 rounded-xl border border-[#f0d99b] bg-[#fffaf0] p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">Payout status: {payoutLabel}</p>
+                      <p className="text-xs text-muted mt-1 leading-5">{payoutDescription}</p>
+                    </div>
+                    {payoutStatus !== "active" && payoutStatus !== "unavailable" && (
+                      <button
+                        type="button"
+                        onClick={handlePayoutSetup}
+                        disabled={payoutStarting}
+                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-xs font-medium text-white transition-all hover:bg-ink/90 disabled:opacity-60"
+                      >
+                        {payoutStarting ? "Opening setup..." : payoutStatus === "pending" ? "Resume setup" : "Set up payouts"}
+                        {!payoutStarting && <ExternalLink size={14} />}
+                      </button>
+                    )}
+                  </div>
+                  {payoutError && <p role="alert" className="text-xs text-red-700 mt-3">{payoutError}</p>}
+                </div>
+              )}
+
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4 mt-12 pt-6 border-t border-hairline">
+                <button
+                  type="button"
+                  onClick={() => setStep((value) => Math.max(0, value - 1))}
+                  disabled={step === 0}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+                {isLastStep ? (
+                  <Link
+                    href="/dashboard/products/new"
+                    onClick={finishGuide}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-medium text-white transition-all hover:bg-ink/90 active:scale-[0.98]"
+                  >
+                    Create your first product
+                    <ArrowRight size={16} />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setStep((value) => Math.min(guideSteps.length - 1, value + 1))}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-6 py-3 text-sm font-medium text-white transition-all hover:bg-ink/90 active:scale-[0.98]"
+                  >
+                    Continue
+                    <ArrowRight size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
@@ -580,7 +799,7 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : !hasProducts ? (
-        <WelcomeState userName={userName} />
+        <WelcomeState userName={userName} payoutStatus={payoutStatus} />
       ) : (
         <DashboardView
           stats={stats}

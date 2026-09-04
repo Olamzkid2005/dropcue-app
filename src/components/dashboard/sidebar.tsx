@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -31,6 +32,7 @@ const navItems = [
 
 export function CreatorSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
 
@@ -44,7 +46,7 @@ export function CreatorSidebar() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    router.push("/");
   }
 
   const isActive = (href: string) => {
@@ -57,9 +59,12 @@ export function CreatorSidebar() {
       {/* Brand */}
       <div className="flex items-center px-6 h-16 border-b border-hairline">
         <Link href="/" aria-label="Dropcue home" className="block h-10 w-[160px] rounded-md overflow-visible">
-          <img
+          <Image
             src="/logo.png"
             alt="Dropcue"
+            width={1024}
+            height={1024}
+            priority
             className="h-full w-full object-cover object-center scale-[1.35]"
           />
         </Link>
@@ -109,9 +114,12 @@ export function CreatorSidebar() {
         {user && (
           <>
             <div className="px-3 py-2 flex items-center gap-3">
-              <img
+              <Image
                 src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.email ?? "")}&backgroundColor=3a30c7&textColor=ffffff&radius=50&fontSize=20&fontWeight=600`}
                 alt=""
+                width={32}
+                height={32}
+                unoptimized
                 className="w-8 h-8 rounded-full border border-hairline shrink-0"
               />
               <div className="min-w-0 flex-1">

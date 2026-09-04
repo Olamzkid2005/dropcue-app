@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
 export function Nav() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClient();
 
@@ -27,7 +30,7 @@ export function Nav() {
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    router.push("/");
   }
 
   return (
@@ -39,11 +42,7 @@ export function Nav() {
             href="/"
             className="flex items-center gap-2.5 group"
           >
-            <img
-              src="/logo.png"
-              alt="Dropcue"
-              className="h-12 w-auto"
-            />
+            <Logo className="h-12 w-auto" />
           </Link>
           {user && (
             <div className="hidden md:flex gap-1 items-center">

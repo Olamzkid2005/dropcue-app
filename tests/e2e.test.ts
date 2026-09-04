@@ -113,7 +113,7 @@ async function runTests() {
       await page.type('input[type="email"]', "test@example.com");
       const emailValue = await page.$eval(
         'input[type="email"]',
-        (el: any) => el.value
+        (el: HTMLInputElement) => el.value
       );
       log(
         "Email input accepts text",

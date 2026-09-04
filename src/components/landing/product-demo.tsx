@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 
 // Deterministic pseudo-random so server and client produce the same heights
 function seededRandom(seed: number) {
@@ -80,9 +81,11 @@ export function ProductDemo() {
     <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden">
       {/* Cover Art */}
       <div className="relative aspect-[4/3] bg-ink overflow-hidden">
-        <img
+        <Image
           src="/midnight-drive-cover.png"
           alt="Midnight Drive cover art"
+          width={659}
+          height={662}
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute top-4 left-4 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-hairline flex items-center gap-2">

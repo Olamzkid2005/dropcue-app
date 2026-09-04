@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 export default function MarketingLayout({
   children,
@@ -15,11 +16,7 @@ export default function MarketingLayout({
               href="/"
               className="flex items-center"
             >
-              <img
-                src="/logo.png"
-                alt="Dropcue"
-                className="h-12 w-auto"
-              />
+              <Logo className="h-12 w-auto" />
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <Link
@@ -86,11 +83,7 @@ export default function MarketingLayout({
                 href="/"
                 className="flex items-center"
               >
-                <img
-                  src="/logo.png"
-                  alt="Dropcue"
-                  className="h-12 w-auto"
-                />
+                <Logo className="h-12 w-auto" />
               </Link>
               <p className="text-sm text-muted leading-relaxed">
                 The simplest way for creators to sell digital products and get

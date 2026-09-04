@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -121,11 +122,7 @@ export default function DownloadPage() {
     return (
       <>
         <header className="w-full h-16 px-6 max-w-[1120px] mx-auto flex items-center justify-start border-b border-outline-variant">
-          <img
-            src="/logo.png"
-            alt="Dropcue"
-            className="h-12 w-auto"
-          />
+          <Logo className="h-12 w-auto" />
         </header>
         <div className="flex flex-grow items-center justify-center px-4">
           <div className="max-w-[560px] w-full bg-surface-studio border border-outline-variant rounded-xl p-8 md:p-16 flex flex-col items-center text-center shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
@@ -158,11 +155,7 @@ export default function DownloadPage() {
     return (
       <>
         <header className="w-full h-16 px-6 max-w-[1120px] mx-auto flex items-center justify-center border-b border-outline-variant">
-          <img
-            src="/logo.png"
-            alt="Dropcue"
-            className="h-12 w-auto"
-          />
+          <Logo className="h-12 w-auto" />
         </header>
         <div className="flex flex-grow items-center justify-center px-4 py-16">
           <div className="max-w-[560px] w-full bg-surface-studio border border-outline-variant rounded-xl p-8 md:p-16 flex flex-col items-center text-center">
@@ -201,11 +194,7 @@ export default function DownloadPage() {
     return (
       <>
         <header className="w-full h-16 px-6 max-w-[1120px] mx-auto flex items-center justify-start border-b border-outline-variant">
-          <img
-            src="/logo.png"
-            alt="Dropcue"
-            className="h-12 w-auto"
-          />
+          <Logo className="h-12 w-auto" />
         </header>
         <div className="flex flex-grow items-center justify-center px-4">
           <div className="text-center space-y-4">
@@ -275,11 +264,7 @@ export default function DownloadPage() {
   return (
     <>
       <header className="w-full h-16 px-6 max-w-[1120px] mx-auto flex items-center justify-start border-b border-outline-variant">
-        <img
-          src="/logo.png"
-          alt="Dropcue"
-          className="h-12 w-auto"
-        />
+        <Logo className="h-12 w-auto" />
       </header>
 
       <main className="flex-grow flex flex-col items-center justify-center py-16 px-4 md:px-6">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { useRouter } from "next/navigation";
 import { resetPassword } from "@/modules/auth/server/actions";
 import { createClient } from "@/lib/supabase/client";
@@ -87,7 +88,7 @@ export default function ResetPasswordPage() {
         <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b border-hairline">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt="Dropcue" className="h-12 w-auto" />
+            <Logo className="h-12 w-auto" />
             </Link>
           </div>
         </header>
@@ -108,7 +109,7 @@ export default function ResetPasswordPage() {
         <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b border-hairline">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt="Dropcue" className="h-12 w-auto" />
+            <Logo className="h-12 w-auto" />
             </Link>
           </div>
         </header>
@@ -145,7 +146,7 @@ export default function ResetPasswordPage() {
         <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b border-hairline">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt="Dropcue" className="h-12 w-auto" />
+            <Logo className="h-12 w-auto" />
             </Link>
           </div>
         </header>
@@ -175,7 +176,7 @@ export default function ResetPasswordPage() {
       <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-md border-b border-hairline">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <img src="/logo.png" alt="Dropcue" className="h-12 w-auto" />
+          <Logo className="h-12 w-auto" />
           </Link>
           <Link
             href="/auth/login"
