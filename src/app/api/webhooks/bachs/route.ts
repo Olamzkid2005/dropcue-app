@@ -112,14 +112,6 @@ async function handleRefundEvent(event: NonNullable<
 >): Promise<Response> {
   const admin = createAdminClient();
 
-  const { data: existing } = await admin
-    .from("payment_events")
-    .select("id")
-    .eq("provider", "bachs")
-    .eq("provider_event_id", event.provider_event_id)
-    .maybeSingle();
-  if (existing) return Response.json({ received: true });
-
   if (!event.charge_id) return Response.json({ received: true });
 
   const { data: order } = await admin
@@ -155,6 +147,31 @@ async function handleRefundEvent(event: NonNullable<
     return Response.json({ received: true });
   }
 
+  // The unique provider_event_id constraint makes this insert the atomic
+  // refund claim. A completed duplicate is safe to acknowledge; a duplicate
+  // that is still processing must stay retryable in case the first request
+  // crashed before finishing the transfer.
+  const { error: claimError } = await admin.from("payment_events").insert({
+    provider: "bachs",
+    provider_event_id: event.provider_event_id,
+    event_type: "refund.processing",
+    order_id: order.id,
+    payload_hash: event.charge_id,
+  });
+  if (claimError) {
+    if (claimError.code !== "23505") throw claimError;
+    const { data: existing } = await admin
+      .from("payment_events")
+      .select("event_type")
+      .eq("provider", "bachs")
+      .eq("provider_event_id", event.provider_event_id)
+      .maybeSingle();
+    if (existing?.event_type === "refund.processing") {
+      return Response.json({ error: "Webhook still processing" }, { status: 500 });
+    }
+    return Response.json({ received: true });
+  }
+
   const isFullRefund = (event.refunded_amount ?? 0) >= order.amount;
 
   if (!isFullRefund) {
@@ -163,10 +180,31 @@ async function handleRefundEvent(event: NonNullable<
       refunded_amount: event.refunded_amount ?? 0,
       order_amount: order.amount,
     });
+    const { error: recordError } = await admin
+      .from("payment_events")
+      .update({
+        event_type: "refund.fee_kept",
+        payload_hash: `partial:${event.refunded_amount ?? 0}`,
+      })
+      .eq("provider", "bachs")
+      .eq("provider_event_id", event.provider_event_id);
+    if (recordError) {
+      await admin
+        .from("payment_events")
+        .delete()
+        .eq("provider", "bachs")
+        .eq("provider_event_id", event.provider_event_id);
+      throw recordError;
+    }
     return Response.json({ received: true });
   }
 
   if (!bachsAccountId) {
+    await admin
+      .from("payment_events")
+      .update({ event_type: "refund.no_account" })
+      .eq("provider", "bachs")
+      .eq("provider_event_id", event.provider_event_id);
     return Response.json({ received: true });
   }
   try {
@@ -179,12 +217,15 @@ async function handleRefundEvent(event: NonNullable<
       idempotencyKey: `feereturn_${event.provider_event_id}`,
     });
 
-    await admin.from("payment_events").insert({
-      provider: "bachs",
-      provider_event_id: event.provider_event_id,
-      event_type: "refund.fee_returned",
-      payload_hash: transferId,
-    });
+    const { error: recordError } = await admin
+      .from("payment_events")
+      .update({
+        event_type: "refund.fee_returned",
+        payload_hash: transferId,
+      })
+      .eq("provider", "bachs")
+      .eq("provider_event_id", event.provider_event_id);
+    if (recordError) throw recordError;
 
     await logAuditEvent("refund_fee_returned", "order", order.id, {
       transfer_id: transferId,
@@ -195,7 +236,15 @@ async function handleRefundEvent(event: NonNullable<
 
     return Response.json({ received: true });
   } catch (error) {
-    // Not recorded → Bachs redelivery retries; Idempotency-Key keeps it safe.
+    // Release only the processing claim. Bachs redelivery retries the transfer;
+    // the same Idempotency-Key prevents a duplicate payout if the provider
+    // completed the transfer before this request observed the failure.
+    await admin
+      .from("payment_events")
+      .delete()
+      .eq("provider", "bachs")
+      .eq("provider_event_id", event.provider_event_id)
+      .eq("event_type", "refund.processing");
     console.error("Platform fee return failed:", error);
     await logAuditEvent("refund_fee_return_failed", "order", order.id, {
       provider_event_id: event.provider_event_id,

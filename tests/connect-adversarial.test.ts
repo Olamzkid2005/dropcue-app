@@ -338,7 +338,45 @@ async function main() {
     `HTTP ${partialStatus}, audited=${!!partialAudit}`
   );
 
-  // 3c. Full refund: transfer attempted → BACHS_SECRET_KEY unset → 500,
+  // 3c. Concurrent identical partial refunds: the database claim allows one
+  // audit outcome and one payment_events row. A request that collides while
+  // the first claim is processing may receive 500 and will be retried by Bachs.
+  const { count: partialAuditsBefore } = await supabase
+    .from("audit_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("event", "refund_fee_kept")
+    .eq("entity_id", orderA);
+  const concurrentRefundId = `evt_${randomUUID()}`;
+  const concurrentRefundBody = refundEvent({
+    eventId: concurrentRefundId,
+    chargeId: chargeA,
+    refundedAmount: (Number(naira) / 2).toFixed(2),
+  });
+  const concurrentStatuses = await Promise.all([
+    webhook(concurrentRefundBody),
+    webhook(concurrentRefundBody),
+  ]);
+  const { count: partialAuditsAfter } = await supabase
+    .from("audit_logs")
+    .select("id", { count: "exact", head: true })
+    .eq("event", "refund_fee_kept")
+    .eq("entity_id", orderA);
+  const { count: concurrentPaymentEvents } = await supabase
+    .from("payment_events")
+    .select("id", { count: "exact", head: true })
+    .eq("provider", "bachs")
+    .eq("provider_event_id", concurrentRefundId);
+  const concurrentAuditDelta =
+    (partialAuditsAfter ?? 0) - (partialAuditsBefore ?? 0);
+  check(
+    "concurrent partial refunds claim once",
+    concurrentStatuses.every((status) => status === 200 || status === 500) &&
+      concurrentAuditDelta === 1 &&
+      concurrentPaymentEvents === 1,
+    `statuses=${concurrentStatuses.join(",")}, audits=${concurrentAuditDelta}, events=${concurrentPaymentEvents}`
+  );
+
+  // 3d. Full refund: transfer attempted → BACHS_SECRET_KEY unset → 500,
   //     audited as failed, NO payment_events row (retry-safe).
   const refundEvtId = `evt_${randomUUID()}`;
   const fullRefund1 = await webhook(
