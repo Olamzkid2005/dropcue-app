@@ -47,7 +47,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[960px] flex-1 flex-col gap-6 p-6 lg:p-10">
+      <main id="main-content" className="mx-auto flex w-full max-w-[960px] flex-1 flex-col gap-6 p-6 lg:p-10">
         <section className="overflow-hidden rounded-[var(--radius-jumbo)] border border-hairline bg-surface shadow-soft">
           <div className="border-b border-hairline bg-gradient-to-br from-accent/10 via-surface to-surface px-6 py-8 lg:px-8">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-accent">Your Dropcue account</p>

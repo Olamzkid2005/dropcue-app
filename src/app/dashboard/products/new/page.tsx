@@ -52,7 +52,7 @@ export default function NewProductPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600 flex items-center gap-3">
+            <div role="alert" className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-600 flex items-center gap-3">
               <i className="fa-solid fa-circle-exclamation" />
               {error}
             </div>

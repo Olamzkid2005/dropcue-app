@@ -64,15 +64,16 @@ export function CheckoutForm({ productId, productName }: CheckoutFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
+          aria-describedby="buyer-email-help"
           className="input-base"
         />
-        <p className="text-[12px] text-secondary">
+        <p id="buyer-email-help" className="text-[12px] text-secondary">
           Your download link will be sent here.
         </p>
       </div>
 
       {error && (
-        <div className="bg-error-container/50 border border-error-red/30 rounded-lg p-3 text-[14px] text-error-red">
+        <div role="alert" className="bg-error-container/50 border border-error-red/30 rounded-lg p-3 text-[14px] text-error-red">
           {error}
         </div>
       )}

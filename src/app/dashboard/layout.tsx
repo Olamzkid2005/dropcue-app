@@ -23,7 +23,7 @@ export default function DashboardLayout({
         </Link>
       </header>
       <MobileNav />
-      <main className="lg:ml-[260px] min-h-screen pb-20 lg:pb-0">
+      <main id="main-content" className="lg:ml-[260px] min-h-screen pb-20 lg:pb-0">
         {children}
       </main>
     </div>

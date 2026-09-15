@@ -1,0 +1,26 @@
+# Dropcue
+
+> Dropcue helps creators sell digital products and deliver files securely after payment.
+
+## Public pages
+
+- [Home](/): Product overview and creator workflow.
+- [How it works](/how-it-works): Upload, price, share, and deliver digital products.
+- [Pricing](/pricing): Dropcue pricing information.
+- [Security](/security): Product security and delivery protections.
+- [Privacy Policy](/privacy): Data collection, processing, retention, and rights.
+- [Terms of Service](/terms): Terms governing use of Dropcue.
+
+## Public machine-readable resources
+
+- [Robots](/robots.txt): Crawler policy and sitemap discovery.
+- [Sitemap](/sitemap.xml): Public canonical URLs.
+- [Security contact](/.well-known/security.txt): Responsible disclosure instructions.
+
+## Product capabilities
+
+Dropcue supports creator authentication, digital product uploads, hosted checkout, payment webhooks, secure expiring download links, transactional email, and creator order tracking.
+
+## Privacy
+
+The application uses essential authentication and session cookies. Product files are stored privately and served through signed URLs after payment verification.

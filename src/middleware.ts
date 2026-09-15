@@ -18,6 +18,15 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Reject browser cross-site state-changing requests before route handlers run.
+  // Webhooks and non-browser clients generally omit Sec-Fetch-Site.
+  const fetchSite = request.headers.get("sec-fetch-site");
+  const isStateChangingMethod = ["POST", "PUT", "PATCH", "DELETE"].includes(request.method);
+  const isWebhook = pathname.startsWith("/api/webhooks/");
+  if (isStateChangingMethod && fetchSite === "cross-site" && !isWebhook) {
+    return applySecurityHeaders(NextResponse.json({ error: "Cross-site request blocked" }, { status: 403 }));
+  }
+
   const isProtectedAppRoute =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/(creator)") ||
@@ -92,7 +101,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return applySecurityHeaders(supabaseResponse);
+  const response = applySecurityHeaders(supabaseResponse);
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/setup") ||
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/download/") ||
+    pathname.startsWith("/payment/")
+  ) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+  return response;
 }
 
 export const config = {

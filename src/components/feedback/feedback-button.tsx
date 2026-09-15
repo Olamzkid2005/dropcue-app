@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { submitFeedback } from "@/modules/feedback/server/actions";
 import { FEEDBACK_CATEGORIES } from "@/modules/feedback/types";
@@ -31,10 +31,14 @@ export function FeedbackButton({
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const handleClose = useCallback(() => {
     if (submitting) return;
     setIsOpen(false);
+    triggerRef.current?.focus();
     // Reset after animation
     setTimeout(() => {
       setSubmitted(false);
@@ -44,6 +48,40 @@ export function FeedbackButton({
       setError("");
     }, 200);
   }, [submitting]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousActive = document.activeElement as HTMLElement | null;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleClose();
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), textarea, input, a[href]'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previousActive?.focus();
+    };
+  }, [isOpen, handleClose]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -86,6 +124,7 @@ export function FeedbackButton({
     <>
       {/* Floating Button */}
       <button
+        ref={triggerRef}
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface border border-hairline text-ink text-[13px] font-medium px-4 py-2.5 rounded-full shadow-soft hover:shadow-jumbo hover:border-accent/30 transition-all duration-200 active:scale-95 cursor-pointer"
         aria-label="Send feedback"
@@ -104,7 +143,13 @@ export function FeedbackButton({
           />
 
           {/* Modal Card */}
-          <div className="relative w-full max-w-[440px] bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="feedback-dialog-title"
+            className="relative w-full max-w-[440px] bg-surface rounded-[var(--radius-jumbo)] shadow-jumbo border border-hairline overflow-hidden animate-in zoom-in-95 fade-in duration-200"
+          >
             {submitted ? (
               /* Success State */
               <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
@@ -124,7 +169,7 @@ export function FeedbackButton({
               <form onSubmit={handleSubmit}>
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-hairline">
-                  <h3 className="text-[16px] font-semibold text-ink">
+                  <h3 id="feedback-dialog-title" className="text-[16px] font-semibold text-ink">
                     Send feedback
                   </h3>
                   <button
@@ -132,8 +177,9 @@ export function FeedbackButton({
                     onClick={handleClose}
                     className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-gray-100 transition-colors cursor-pointer"
                     disabled={submitting}
+                    aria-label="Close feedback dialog"
                   >
-                    <i className="fa-solid fa-xmark text-[16px]" />
+                    <i aria-hidden="true" className="fa-solid fa-xmark text-[16px]" />
                   </button>
                 </div>
 
@@ -180,6 +226,7 @@ export function FeedbackButton({
                     </label>
                     <textarea
                       id="feedback-message"
+                      aria-describedby={error ? "feedback-error" : undefined}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Describe the issue or share your suggestion..."
@@ -210,7 +257,7 @@ export function FeedbackButton({
 
                   {/* Error */}
                   {error && (
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-[13px] text-red-600">
+                    <div id="feedback-error" role="alert" className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-[13px] text-red-600">
                       <i className="fa-solid fa-circle-exclamation text-[14px] shrink-0" />
                       {error}
                     </div>

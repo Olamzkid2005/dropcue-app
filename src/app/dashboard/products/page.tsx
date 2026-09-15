@@ -61,7 +61,8 @@ function ProductActions({
           e.stopPropagation();
           setOpen(!open);
         }}
-        className="w-9 h-9 rounded-lg border border-hairline flex items-center justify-center text-muted hover:text-ink hover:border-ink/20 transition-all"
+        aria-label={`Actions for ${product.name}`}
+        className="w-10 h-10 rounded-lg border border-hairline flex items-center justify-center text-muted hover:text-ink hover:border-ink/20 transition-all"
       >
         <i className="fa-solid fa-ellipsis" />
       </button>

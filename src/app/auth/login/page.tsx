@@ -108,7 +108,7 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
+      <main id="main-content" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
         <div className="w-full max-w-[480px] space-y-8">
           <div className="text-center">
             <h1 className="text-[32px] font-semibold tracking-tight text-ink mb-2">
@@ -260,13 +260,13 @@ export default function LoginPage() {
               )}
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-[14px] text-red-600">
+                <div role="alert" id="login-error" className="bg-red-50 border border-red-200 rounded-lg p-3 text-[14px] text-red-600">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-[14px] text-green-700">
+                <div role="status" aria-live="polite" className="bg-green-50 border border-green-200 rounded-lg p-3 text-[14px] text-green-700">
                   {success}
                 </div>
               )}

@@ -88,10 +88,12 @@ export function MockCheckoutClient({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium text-[#141416] block">
+        <label htmlFor="mock-buyer-email" className="text-sm font-medium text-[#141416] block">
           Email address
         </label>
         <input
+          id="mock-buyer-email"
+          aria-describedby={error ? "mock-checkout-error" : undefined}
           type="email"
           required
           value={email}
@@ -105,7 +107,7 @@ export function MockCheckoutClient({
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-[13px] text-red-600">
+        <div id="mock-checkout-error" role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 text-[13px] text-red-600">
           {error}
         </div>
       )}

@@ -72,7 +72,7 @@ export default function MarketingLayout({
         </div>
       </header>
 
-      <main className="overflow-x-hidden">{children}</main>
+      <main id="main-content" className="overflow-x-hidden">{children}</main>
 
       {/* Footer — exact from design */}
       <footer className="bg-paper border-t border-hairline py-20">
@@ -119,23 +119,8 @@ export default function MarketingLayout({
               <h4 className="font-medium mb-6">Company</h4>
               <ul className="space-y-4 text-sm text-muted">
                 <li>
-                  <a href="#" className="hover:text-ink transition-colors">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-ink transition-colors">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-ink transition-colors">
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-ink transition-colors">
-                    Contact
+                  <a href="mailto:hello@dropcue.com" className="hover:text-ink transition-colors">
+                    Contact Dropcue
                   </a>
                 </li>
               </ul>
@@ -144,14 +129,14 @@ export default function MarketingLayout({
               <h4 className="font-medium mb-6">Legal</h4>
               <ul className="space-y-4 text-sm text-muted">
                 <li>
-                  <a href="#" className="hover:text-ink transition-colors">
+                  <Link href="/privacy" className="hover:text-ink transition-colors">
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-ink transition-colors">
+                  <Link href="/terms" className="hover:text-ink transition-colors">
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -162,22 +147,28 @@ export default function MarketingLayout({
             </p>
             <div className="flex items-center gap-6">
               <a
-                href="#"
+                href="https://x.com/dropcue"
+                aria-label="Dropcue on X"
+                rel="me noopener noreferrer"
                 className="text-muted hover:text-ink transition-colors"
               >
-                <i className="fa-brands fa-x-twitter" />
+                <i aria-hidden="true" className="fa-brands fa-x-twitter" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/dropcue"
+                aria-label="Dropcue on Instagram"
+                rel="me noopener noreferrer"
                 className="text-muted hover:text-ink transition-colors"
               >
-                <i className="fa-brands fa-instagram" />
+                <i aria-hidden="true" className="fa-brands fa-instagram" />
               </a>
               <a
-                href="#"
+                href="https://www.tiktok.com/@dropcue"
+                aria-label="Dropcue on TikTok"
+                rel="me noopener noreferrer"
                 className="text-muted hover:text-ink transition-colors"
               >
-                <i className="fa-brands fa-tiktok" />
+                <i aria-hidden="true" className="fa-brands fa-tiktok" />
               </a>
             </div>
           </div>

@@ -267,7 +267,7 @@ export default function DownloadPage() {
         <Logo className="h-12 w-auto" />
       </header>
 
-      <main className="flex-grow flex flex-col items-center justify-center py-16 px-4 md:px-6">
+      <main id="main-content" className="flex-grow flex flex-col items-center justify-center py-16 px-4 md:px-6">
         <div className="w-full max-w-[640px] flex flex-col gap-8">
           {/* Success Header */}
           <div className="text-center flex flex-col items-center gap-2">

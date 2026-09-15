@@ -227,6 +227,7 @@ export function FileUpload({
                 )}
               </div>
               <button
+                aria-label={`Delete ${file.original_filename}`}
                 onClick={() => handleDelete(file.id)}
                 disabled={deleting === file.id}
                 className="ml-2 text-xs text-muted-foreground hover:text-destructive disabled:opacity-50"
@@ -276,6 +277,7 @@ export function FileUpload({
       </div>
 
       <input
+        aria-label="Choose files to upload"
         ref={fileInputRef}
         type="file"
         multiple

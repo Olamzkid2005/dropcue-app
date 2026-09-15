@@ -58,7 +58,7 @@ export default async function PublicProductPage({ params}
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow w-full py-16 px-4 md:px-6 bg-[#F8FAFC]">
+      <main id="main-content" className="flex-grow w-full py-16 px-4 md:px-6 bg-[#F8FAFC]">
         <div className="max-w-[1120px] mx-auto h-full flex items-center justify-center">
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 max-w-[1000px]">
             {/* Left: Visuals */}

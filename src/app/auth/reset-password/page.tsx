@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
             </Link>
           </div>
         </header>
-        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
+        <main id="main-content" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
           <div className="text-center space-y-4">
             <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="text-[14px] text-muted">Verifying your reset link...</p>
@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
             </Link>
           </div>
         </header>
-        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
+        <main id="main-content" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
           <div className="w-full max-w-[480px] space-y-8">
             <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline p-8 text-center space-y-4">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
             </Link>
           </div>
         </header>
-        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
+        <main id="main-content" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
           <div className="w-full max-w-[480px] space-y-8">
             <div className="bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline p-8 text-center space-y-4">
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto">
@@ -187,7 +187,7 @@ export default function ResetPasswordPage() {
         </div>
       </header>
 
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
+      <main id="main-content" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 bg-paper">
         <div className="w-full max-w-[480px] space-y-8">
           <div className="text-center">
             <h1 className="text-[32px] font-semibold tracking-tight text-ink mb-2">
@@ -263,7 +263,7 @@ export default function ResetPasswordPage() {
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-[14px] text-red-600">
+                <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 text-[14px] text-red-600">
                   {error}
                 </div>
               )}

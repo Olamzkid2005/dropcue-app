@@ -149,7 +149,7 @@ export default function MarketingHomePage() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            <a href="#" className="group space-y-4">
+            <Link href="/how-it-works" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -170,8 +170,8 @@ export default function MarketingHomePage() {
                   </p>
                 </div>
               </div>
-            </a>
-            <a href="#" className="group space-y-4">
+            </Link>
+            <Link href="/how-it-works" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -192,8 +192,8 @@ export default function MarketingHomePage() {
                   </p>
                 </div>
               </div>
-            </a>
-            <a href="#" className="group space-y-4">
+            </Link>
+            <Link href="/how-it-works" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -214,8 +214,8 @@ export default function MarketingHomePage() {
                   </p>
                 </div>
               </div>
-            </a>
-            <a href="#" className="group space-y-4">
+            </Link>
+            <Link href="/how-it-works" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -236,8 +236,8 @@ export default function MarketingHomePage() {
                   </p>
                 </div>
               </div>
-            </a>
-            <a href="#" className="group space-y-4">
+            </Link>
+            <Link href="/how-it-works" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -258,8 +258,8 @@ export default function MarketingHomePage() {
                   </p>
                 </div>
               </div>
-            </a>
-            <a href="#" className="group space-y-4">
+            </Link>
+            <Link href="/how-it-works" className="group space-y-4">
               <div className="aspect-square bg-surface rounded-[var(--radius-jumbo)] shadow-soft border border-hairline overflow-hidden">
                 <Image
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -280,7 +280,7 @@ export default function MarketingHomePage() {
                   </p>
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </section>

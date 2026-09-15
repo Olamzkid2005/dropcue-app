@@ -3,7 +3,7 @@ const BASE = "http://127.0.0.1:3000";
 const results: { name: string; status: string; details?: string }[] = [];
 
 function errMsg(e: unknown): string {
-  return e instanceof Error ? errMsg(e) : String(e);
+  return e instanceof Error ? e.message : String(e);
 }
 
 function log(name: string, pass: boolean, details?: string) {

@@ -67,11 +67,12 @@ export function Nav() {
                 <span className="material-symbols-outlined text-[16px]">add</span>
                 Create Product
               </Link>
-              <button className="text-secondary hover:text-on-surface hover:bg-surface-container-low p-2 rounded-lg transition-all duration-200">
+              <button aria-label="View notifications" className="text-secondary hover:text-on-surface hover:bg-surface-container-low p-2 rounded-lg transition-all duration-200">
                 <span className="material-symbols-outlined text-[22px]">notifications</span>
               </button>
               <button
                 onClick={handleSignOut}
+                aria-label="Sign out"
                 className="w-8 h-8 rounded-full bg-accent-indigo/10 border border-accent-indigo/20 cursor-pointer hover:bg-accent-indigo/20 transition-colors"
               >
                 <div className="w-full h-full flex items-center justify-center text-accent-indigo text-sm font-semibold">

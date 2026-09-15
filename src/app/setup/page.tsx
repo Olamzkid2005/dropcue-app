@@ -102,7 +102,7 @@ export default function SetupPage() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4 text-sm text-red-700">
+            <div role="alert" className="bg-red-50 border border-red-200 rounded-md p-3 mb-4 text-sm text-red-700">
               {error}
             </div>
           )}

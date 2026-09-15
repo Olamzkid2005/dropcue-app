@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 0.5rem;
+  background: var(--ink);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
 /* Fonts: Geist & Inter come from next/font (layout.tsx — self-hosted, no
    external CSS round-trip). Material Symbols loads via the <link> in
    layout.tsx. Do not re-import webfonts here — @import serializes and
@@ -254,6 +277,30 @@ body {
 
 html {
   overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  *,
+  *::before,
+  *::after {
+    forced-color-adjust: auto;
+  }
+
+  :focus-visible {
+    outline: 3px solid CanvasText;
+  }
 }
 
 /* Scrollbar */
